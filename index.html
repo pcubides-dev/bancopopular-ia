@@ -31,7 +31,7 @@ p{margin:0;color:var(--soft);max-width:62ch;text-wrap:pretty}
 .stripe{height:3px;background:linear-gradient(90deg,#20C4D8 0 12%,#7B4DFF 12% 25%,#D13DDB 25% 37%,#F2512B 37% 50%,#F6B60E 50% 62%,#C8F31D 62% 75%,#20C4D8 75% 87%,#7B4DFF 87%)}
 
 .nav{position:fixed;left:50%;transform:translateX(-50%);top:14px;z-index:4;display:flex;gap:2px;padding:5px;border-radius:999px;background:rgba(255,255,255,.62);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 30px -18px rgba(60,48,110,.35)}
-.nav a{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--soft);text-decoration:none;padding:7px 12px;border-radius:999px;transition:background .4s var(--ease),color .4s var(--ease)}
+.nav a{white-space:nowrap;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--soft);text-decoration:none;padding:7px 12px;border-radius:999px;transition:background .4s var(--ease),color .4s var(--ease)}
 .nav a:hover{background:rgba(22,22,27,.06);color:var(--ink)}
 
 section,.hero{position:relative;isolation:isolate}
@@ -228,6 +228,27 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
 .cell.wide.img > div::after{background:linear-gradient(90deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.82) 30%,rgba(255,255,255,0) 48%)}
 .cell.wide.img > div > *{max-width:40ch}
 @media (max-width:860px){.cell.wide.img > div::after{background:linear-gradient(180deg,rgba(255,255,255,0) 20%,rgba(255,255,255,.92) 62%)}.cell.wide.img > div > *{max-width:none}}
+
+/* actividad IA */
+#actividad::before{background:radial-gradient(55% 55% at 15% 40%,rgba(246,182,14,.10),transparent 70%),radial-gradient(45% 45% at 90% 70%,rgba(123,77,255,.08),transparent 70%)}
+.act-head{max-width:760px}
+.act-head p{margin-top:18px}
+.act-grid{margin-top:clamp(40px,6vw,64px);display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(24px,4vw,56px);align-items:start}
+.chat{padding:clamp(20px,2.4vw,28px);position:sticky;top:110px;display:grid;gap:12px}
+.chat-top{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.chat-top span{background:var(--gold);color:#111;padding:3px 9px;border-radius:999px;letter-spacing:.1em}
+.msg{background:#fff;border:1px solid var(--hair);border-radius:16px 16px 16px 4px;padding:12px 14px;transition:transform .5s var(--ease)}
+.msg b{display:block;font-size:12px;font-weight:600;color:var(--mute);margin-bottom:3px}
+.msg p{font-size:14.5px;color:var(--ink)}
+.msg mark{background:linear-gradient(transparent 55%,rgba(246,182,14,.55) 55%);color:var(--ink);font-weight:600;padding:0 2px}
+.flow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.flow article{border-radius:var(--r-out);padding:clamp(20px,2.4vw,28px);background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.95);box-shadow:0 24px 46px -34px rgba(60,48,110,.4);display:flex;flex-direction:column;gap:8px;transition:transform .6s var(--ease),box-shadow .6s var(--ease),background .6s var(--ease)}
+.flow article.wide{grid-column:span 2;background:radial-gradient(90% 140% at 0% 100%,rgba(246,182,14,.16),transparent 60%),rgba(255,255,255,.8)}
+.flow .k{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-ink)}
+.flow h3{font-size:clamp(22px,2.2vw,28px)}
+.flow p{font-size:15px}
+@media (hover:hover){.flow article:hover{transform:translateY(-6px);background:#fff;box-shadow:0 36px 64px -34px rgba(60,48,110,.5)}.msg:hover{transform:translateX(6px)}}
+@media (max-width:860px){.act-grid,.flow{grid-template-columns:1fr}.flow article.wide{grid-column:auto}.chat{position:static}}
 /* interacción al pasar el mouse */
 .sp,.theme,figure .bezel,.journey > div,.rows > div,.run > div,.tbl{transition:transform .6s var(--ease),box-shadow .6s var(--ease),border-color .6s var(--ease),background .6s var(--ease)}
 .ph,figure .bezel{overflow:hidden}
@@ -284,7 +305,7 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
 
 <div class="stripe"></div>
 <nav class="nav" aria-label="Secciones">
-  <a href="#idea">Idea</a><a href="#conferencista">Conferencistas</a><a href="#contenidos">Contenidos</a><a href="#escenario">Escenario</a><a href="#formato">Formato</a><a href="#tecnica">Técnica</a><a href="#presupuesto">Presupuesto</a>
+  <a href="#idea">Idea</a><a href="#conferencista">Conferencistas</a><a href="#contenidos">Contenidos</a><a href="#escenario">Escenario</a><a href="#formato">Formato</a><a href="#actividad">Actividad IA</a><a href="#tecnica">Técnica</a><a href="#presupuesto">Presupuesto</a>
 </nav>
 
 <header class="wrap hero">
@@ -333,7 +354,7 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
       <p class="fit">Puede explorar cómo la IA está cambiando las reglas de juego, qué capacidades necesitan las organizaciones y cómo la banca puede anticiparse a este nuevo entorno.</p>
     </div></article>
   </div>
-  <p class="note rv">Para el bloque de conversación sugerimos sumar a un líder de Banco Popular junto a los conferencistas. Honorarios y disponibilidad se confirman con cada conferencista.</p>
+  <p class="note rv">El host del evento, un vocero de Banco Popular, conduce la conversación con el conferencista. Honorarios y disponibilidad se confirman con cada conferencista.</p>
 </section>
 
 <section class="wrap" id="contenidos">
@@ -358,8 +379,8 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
     <article class="theme rv">
       <div><p class="when">Bloque 3 · 20 min · Conversación</p><h3>El debate y el ritmo de la IA</h3></div>
       <dl>
-        <div><dt>Enfoque</dt><dd>Conversación moderada entre el experto y un líder de Banco Popular sobre la velocidad de la IA, la regulación, la ética, la confianza del cliente mayor y los retos de la banca.</dd></div>
-        <div><dt>Participación</dt><dd>Preguntas de los participantes en vivo, filtradas por el moderador.</dd></div>
+        <div><dt>Enfoque</dt><dd>Conversación entre el conferencista y el host de Banco Popular sobre la velocidad de la IA, la regulación, la ética, la confianza del cliente mayor y los retos de la banca.</dd></div>
+        <div><dt>Participación</dt><dd>Preguntas de los participantes por el chat del evento, que el host lleva al set.</dd></div>
         <div><dt>En el escenario</dt><dd>El flujo de datos se acelera detrás de la conversación.</dd></div>
       </dl>
     </article>
@@ -377,7 +398,7 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
   <div class="rv" style="max-width:760px"><h2>Diseño de escenario</h2><p style="margin-top:18px">Una sala cálida, con madera, plantas y luz de lámpara, que representa la cercanía del banco. Detrás, un ventanal de piso a techo por donde fluye la IA en el verde de Banco Popular. El ventanal cambia con cada bloque.</p></div>
   <figure class="stage-hero rv"><div class="bezel"><img src="set1.jpg" alt="Render del escenario virtual: el conferencista de pie en una sala cálida con un gran ventanal donde fluyen datos verdes"></div><figcaption><b>Conferencia</b>El experto de pie en la tarima de madera. Detrás, el río de datos del primer bloque.</figcaption></figure>
   <div class="stage-pair">
-    <figure class="rv"><div class="bezel"><img src="set2.jpg" alt="Render de la conversación: tres personas sentadas en sillas azul petróleo frente al ventanal con la ciudad y datos acelerados"></div><figcaption><b>Conversación</b>Moderador, experto y líder de Banco Popular. La ciudad conectada y el flujo acelerado del bloque del debate.</figcaption></figure>
+    <figure class="rv"><div class="bezel"><img src="set2.jpg" alt="Render de la conversación: tres personas sentadas en sillas azul petróleo frente al ventanal con la ciudad y datos acelerados"></div><figcaption><b>Conversación</b>El host de Banco Popular y el conferencista. La ciudad conectada y el flujo acelerado del bloque del debate.</figcaption></figure>
     <figure class="rv"><div class="bezel"><img src="set3.jpg" alt="Render del cierre: una mujer observa en el ventanal cientos de puntos de luz que forman una constelación"></div><figcaption><b>Cierre</b>Las horas recuperadas y los momentos que propone el equipo aparecen como puntos de luz que forman una sola figura.</figcaption></figure>
   </div>
   <div class="stage-txt">
@@ -393,21 +414,43 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
   <h2 class="rv">Formato y dinámica</h2>
   <div class="agenda">
     <div class="run rv">
-      <div><time>−15'</time><div><h3>Sala de espera</h3><p>Cuenta regresiva con la identidad del evento y una pregunta de calentamiento.</p></div></div>
-      <div><time>00'</time><div><h3>Apertura</h3><p>El ventanal del set muestra un reloj que se detiene y el moderador plantea la pregunta del día: qué haríamos con el tiempo que nos devuelve la IA.</p></div></div>
-      <div><time>05'</time><div><h3>Palabras de Banco Popular</h3><p>Un vocero del banco presenta el propósito del encuentro.</p></div></div>
-      <div><time>10'</time><div><h3>Bloque 1</h3><p>¿Por qué la IA puede cambiar el mundo? Primer pulso en vivo.</p></div></div>
-      <div><time>30'</time><div><h3>Bloque 2</h3><p>¿Cómo adaptarnos a la IA? Segundo pulso en vivo.</p></div></div>
-      <div><time>50'</time><div><h3>Bloque 3</h3><p>El debate y el ritmo de la IA. Conversación y preguntas del público.</p></div></div>
-      <div><time>70'</time><div><h3>El mejor momento</h3><p>Se revela el total de horas recuperadas y el equipo responde qué momento le daría a un cliente con ese tiempo.</p></div></div>
-      <div><time>80'</time><div><h3>Fin</h3><p>La grabación queda disponible para quienes no pudieron conectarse.</p></div></div>
+      <div><time>−15'</time><div><h3>Sala de espera</h3><p>Cuenta regresiva con la imagen del evento. En pantalla y en el chat aparecen las instrucciones para participar y un mensaje de prueba para que todos ubiquen el chat.</p></div></div>
+      <div><time>00'</time><div><h3>Bienvenida del host</h3><p>Un vocero de Banco Popular abre el evento desde el set. El ventanal muestra un reloj que se detiene y el host plantea la pregunta del día: qué haríamos con el tiempo que nos devuelve la IA.</p></div></div>
+      <div><time>05'</time><div><h3>Cómo vamos a participar</h3><p>El host explica en un minuto la dinámica del chat y presenta al conferencista.</p></div></div>
+      <div><time>08'</time><div><h3>Bloque 1 · Conferencia</h3><p>¿Por qué la IA puede cambiar el mundo? Al final, el host abre el primer pulso en el chat: qué tarea delegarías a la IA y cuánto tiempo te toma.</p></div></div>
+      <div><time>28'</time><div><h3>Primer resultado</h3><p>Mientras el conferencista retoma, la IA procesa el chat. El host revela en el ventanal el primer conteo de horas y las tareas más repetidas.</p></div></div>
+      <div><time>32'</time><div><h3>Bloque 2 · Conferencia</h3><p>¿Cómo adaptarnos a la IA? Segundo pulso en el chat: qué parte de tu trabajo no le entregarías nunca.</p></div></div>
+      <div><time>52'</time><div><h3>Bloque 3 · Conversación</h3><p>El debate y el ritmo de la IA. El host conversa con el conferencista y lleva al set las preguntas que llegan por el chat.</p></div></div>
+      <div><time>70'</time><div><h3>El mejor momento</h3><p>El ventanal revela el total de horas que el equipo recuperaría en un año. Último pulso en el chat: qué momento le darías a un cliente con ese tiempo. Las respuestas se ven en pantalla.</p></div></div>
+      <div><time>80'</time><div><h3>Cierre del host</h3><p>Palabras de cierre de Banco Popular. La grabación queda disponible para quienes no pudieron conectarse.</p></div></div>
     </div>
     <div class="journey glass rv">
       <div><h3>Antes</h3><p>Página de registro con la imagen del evento, recordatorios por correo y una pregunta de entrada que ya alimenta a la IA del set.</p></div>
-      <div><h3>Durante</h3><p>Transmisión en alta definición para 300 personas, con chat, preguntas y dos pulsos cortos que alimentan el contador de horas en pantalla.</p></div>
-      <div><h3>Después</h3><p>Cada participante recibe la pieza con las horas recuperadas y el enlace a la grabación.</p></div>
+      <div><h3>Durante</h3><p>Transmisión en alta definición para 300 personas. Toda la participación pasa por el chat del evento: tres pulsos cortos y las preguntas para el conferencista.</p></div>
+      <div><h3>Después</h3><p>Banco Popular recibe el informe construido con el chat completo. Cada participante recibe una pieza con las horas recuperadas y el enlace a la grabación.</p></div>
     </div>
   </div>
+</section>
+
+<section class="wrap" id="actividad">
+  <div class="act-head rv"><h2>La actividad con IA, paso a paso</h2><p>Todo ocurre en el chat del evento, la herramienta que los 300 participantes ya tienen abierta. No hay que descargar nada ni entrar a otra página.</p></div>
+  <div class="act-grid">
+    <div class="chat glass rv" aria-label="Ejemplo de mensajes en el chat del evento">
+      <p class="chat-top">Chat del evento <span>Ejemplo</span></p>
+      <div class="msg"><b>Participante 1</b><p><mark>#Delego</mark> conciliar los reportes de cartera · 3 horas a la semana</p></div>
+      <div class="msg"><b>Participante 2</b><p><mark>#Delego</mark> responder correos de estado de solicitudes · 1 hora al día</p></div>
+      <div class="msg"><b>Participante 3</b><p><mark>#EsMío</mark> explicarle a un pensionado cómo funciona su CDT</p></div>
+      <div class="msg"><b>Participante 4</b><p><mark>#Momento</mark> sentarme sin afán con los clientes nuevos de la oficina</p></div>
+    </div>
+    <div class="flow">
+      <article class="rv"><span class="k">El host invita</span><h3>Una consigna simple</h3><p>En cada pulso el host da una palabra clave y una pregunta. Los participantes responden en el chat empezando por esa palabra: #Delego, #EsMío o #Momento. La consigna también queda fija en pantalla.</p></article>
+      <article class="rv"><span class="k">Se exporta</span><h3>El chat sale en un archivo</h3><p>Al cerrar cada pulso, después de tres minutos, el operador exporta el chat completo desde la plataforma en un archivo de texto o CSV.</p></article>
+      <article class="rv"><span class="k">La IA procesa</span><h3>De mensajes a horas</h3><p>La IA filtra los mensajes por palabra clave, agrupa las tareas parecidas, convierte los tiempos a horas por año y detecta los temas que más se repiten. El equipo revisa el resultado antes de mostrarlo.</p></article>
+      <article class="rv"><span class="k">Vuelve al set</span><h3>Resultados en el ventanal</h3><p>En tres o cuatro minutos el resultado llega al escenario: el contador de horas, las cinco tareas más delegadas y las frases que el equipo considera suyas. El host las comenta en vivo.</p></article>
+      <article class="rv wide"><span class="k">Después del evento</span><h3>Un informe para Banco Popular</h3><p>Con el chat completo entregamos un informe que muestra qué tareas quiere el equipo apoyar con IA y cuántas horas representan, qué considera esencial de su trabajo y qué momentos quiere darles a los clientes. Es un insumo real para la hoja de ruta de IA del banco. Los participantes reciben además una pieza con el resultado final.</p></article>
+    </div>
+  </div>
+  <p class="note rv">El procesamiento usa solo lo que se escribe en el chat del evento. No se cruza con datos de clientes ni con sistemas del banco.</p>
 </section>
 
 <section class="wrap" id="tecnica">
@@ -416,9 +459,9 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
     <div class="cell wide img rv" style="--img:url(set1.jpg);--pos:62% 12%"><div><h3>Escenario virtual 3D</h3><p>Diseño y modelado del set con la identidad de Banco Popular, motor de render en tiempo real y operador de escenario durante ensayo y transmisión.</p><em>Cambios de ambiente por bloque y pantallas virtuales en vivo.</em></div></div>
     <div class="cell big glow rv"><div><h3>Estudio croma</h3><p>Cámaras, iluminación, teleprompter para el experto y monitores de retorno para ver presentaciones y participantes.</p><em>Ensayo técnico completo el día anterior.</em></div></div>
     <div class="cell big rv"><div><h3>Transmisión</h3><p>Master de transmisión, switcher, integrador de gráficos y presentaciones, licencia de streaming en alta definición y grabación de respaldo.</p><em>Paquete gráfico con cortinillas y créditos en pantalla.</em></div></div>
-    <div class="cell rv"><div><h3>Audio</h3><p>Micrófonos de diadema con retorno in-ear para el experto y el moderador, consola y técnico de audio.</p></div></div>
-    <div class="cell rv"><div><h3>Plataforma para 300</h3><p>Sala para 300 conectados con chat, preguntas y encuestas, embebida en la página de registro.</p></div></div>
-    <div class="cell glow rv"><div><h3>IA en vivo</h3><p>Un operador recibe las respuestas, la IA calcula las horas y agrupa los momentos, y el equipo los cura antes de que salgan al ventanal.</p><em>Sin datos de clientes del banco.</em></div></div>
+    <div class="cell rv"><div><h3>Audio</h3><p>Micrófonos de diadema con retorno in-ear para el conferencista y el host, consola y técnico de audio.</p></div></div>
+    <div class="cell rv"><div><h3>Plataforma para 300</h3><p>Sala para 300 conectados con chat exportable y preguntas, embebida en la página de registro.</p></div></div>
+    <div class="cell glow rv"><div><h3>IA en vivo</h3><p>Un operador exporta el chat al cerrar cada pulso, la IA calcula las horas y agrupa las respuestas, y el equipo las revisa antes de que salgan al ventanal.</p><em>Sin datos de clientes del banco.</em></div></div>
   </div>
 </section>
 
@@ -499,8 +542,8 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
 
     <div class="aside-stack">
       <div class="kpi rv"><span>Evento virtual · total con IVA</span><b>$28.442.869</b><p>Sin honorarios del conferencista, que dependen del perfil elegido.</p></div>
-      <div class="glass mini rv"><h3>IA en vivo</h3><p>Desarrollo del contador de horas, operador durante el evento y pieza final para los participantes.</p><b class="v">Por cotizar</b></div>
-      <div class="glass mini rv"><h3>Moderador profesional</h3><p>Opcional. Conducción del evento y del bloque de conversación.</p><b class="v">$1.846.154</b><p class="small" style="margin-top:6px">Antes de IVA</p></div>
+      <div class="glass mini rv"><h3>IA en vivo</h3><p>Diseño de la dinámica en el chat, procesamiento del chat exportado durante el evento, operador, informe final para Banco Popular y pieza para los participantes.</p><b class="v">Por cotizar</b></div>
+      <div class="glass mini rv"><h3>Host del evento</h3><p>Lo conduce un vocero de Banco Popular. Preparamos con él el guion y lo acompañamos en el ensayo técnico.</p><b class="v">Incluido</b></div>
       <p class="note">Valores sujetos a confirmación de fecha y a negociación final con proveedores.</p>
     </div>
   </div>
