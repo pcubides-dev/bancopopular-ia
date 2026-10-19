@@ -48,8 +48,9 @@ section::before,.hero::before{content:"";position:absolute;z-index:-1;top:0;bott
 .logos{display:flex;align-items:center;gap:18px;margin-bottom:clamp(32px,5vw,56px)}
 .logo{width:clamp(180px,20vw,260px);height:auto;display:block;filter:brightness(0)}
 .logos .sep{display:block;width:1px;height:clamp(26px,3vw,40px);background:var(--hair)}
-.logos img.inmov{height:clamp(22px,2.3vw,32px);width:auto}
-@media (max-width:480px){.logos span{display:none}.logos img.inmov{height:20px}}
+.logos img.inmov{height:clamp(30px,3.6vw,48px);width:auto}
+.logos .logo{width:clamp(110px,10vw,150px)}
+@media (max-width:480px){.logos span{display:none}.logos img.inmov{height:28px}.logos .logo{width:110px}}
 .logos span{font-family:var(--mono);font-size:14px;color:var(--mute)}
 .logos img.bp{height:clamp(22px,2.2vw,28px);width:auto}
 .slate{display:inline-grid;grid-template-columns:repeat(3,auto);margin:0;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
@@ -213,7 +214,8 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
 .endmark{display:block;width:min(820px,86vw);height:auto;margin:clamp(96px,12vw,160px) auto 0;filter:brightness(0);-webkit-box-reflect:below 4px linear-gradient(transparent 55%,rgba(255,255,255,.22))}
 .close .legal{font-size:15px;max-width:62ch;margin:24px auto 0;color:var(--soft)}
 .endmarks{display:flex;flex-direction:column;align-items:center}
-.endmark-inmov{display:block;width:min(460px,70vw);height:auto;margin-top:clamp(80px,9vw,120px)}
+.endmark-inmov{display:block;width:min(900px,88vw);height:auto;margin-top:clamp(96px,12vw,150px)}
+.endmarks .endmark{width:min(300px,52vw);margin-top:clamp(48px,6vw,72px)}
 .close h2{font-size:clamp(44px,7vw,100px)}
 .close p{margin:22px auto 0}
 .close-panel{max-width:860px;margin-inline:auto;padding:clamp(32px,5vw,64px) clamp(20px,4vw,56px)}
@@ -286,7 +288,7 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
 </nav>
 
 <header class="wrap hero">
-  <div class="logos"><img class="logo" src="wordmark.png" alt="Wonderlust"><i class="sep" aria-hidden="true"></i><img class="inmov" src="inmov-naranja.png" alt="Inmov Global Network"><span>×</span><img class="bp" src="bp-logo-verde.png" alt="Banco Popular"></div>
+  <div class="logos"><img class="inmov" src="inmov-naranja.png" alt="Inmov Global Network"><i class="sep" aria-hidden="true"></i><img class="logo" src="wordmark.png" alt="Wonderlust"><span>×</span><img class="bp" src="bp-logo-verde.png" alt="Banco Popular"></div>
   <div class="glass hero-panel">
     <dl class="slate"><div><dt>Para</dt><dd>Banco Popular</dd></div><div><dt>Formato</dt><dd>Evento virtual</dd></div><div><dt>Fecha</dt><dd>Octubre 2026</dd></div></dl>
     <h1><span>Inteligencia</span><span><em>Popular</em></span></h1>
@@ -525,7 +527,7 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
     <h2>Gracias por<br><em>la confianza</em></h2>
     <p class="legal">Esta propuesta, su concepto creativo, la dirección de arte y los desarrollos que contiene son propiedad intelectual de Wonderlust. Se comparte de forma confidencial con Banco Popular para su evaluación y no puede compartirse con otras agencias ni implementarse, total o parcialmente, sin la participación de Wonderlust.</p>
     </div>
-    <div class="endmarks"><img class="endmark" src="wordmark-xl.png" alt="Wonderlust"><img class="endmark-inmov" src="inmov-naranja.png" alt="Inmov Global Network"></div>
+    <div class="endmarks"><img class="endmark-inmov" src="inmov-naranja.png" alt="Inmov Global Network"><img class="endmark" src="wordmark-xl.png" alt="Wonderlust"></div>
   </div>
 </section>
 <div class="stripe"></div>
