@@ -151,7 +151,7 @@ figcaption b{display:block;font-family:var(--display);font-weight:400;text-trans
 .cell.wide{grid-column:span 6}
 .cell.wide > div{min-height:320px;justify-content:flex-end}
 .cell.wide > div > *{max-width:52ch}
-.cell.img > div::before{content:"";position:absolute;inset:0;z-index:-2;background:var(--img) center/cover no-repeat}
+.cell.img > div::before{content:"";position:absolute;inset:0;z-index:-2;background:var(--img) var(--pos,center)/cover no-repeat;transition:transform 1.2s var(--ease),filter .8s var(--ease)}
 .cell.img > div::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.85) 38%,rgba(255,255,255,0) 70%)}
 .cell.glow > div{background:radial-gradient(120% 90% at 100% 0%,rgba(246,182,14,.12),transparent 55%),var(--bg2)}
 .cell h3{font-size:clamp(22px,2.2vw,28px)}
@@ -216,6 +216,39 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
 .contact .cta{margin-top:0}
 .small{font-family:var(--mono);font-size:12px;color:var(--mute)}
 
+
+.cell.wide.img > div::after{background:linear-gradient(90deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.82) 30%,rgba(255,255,255,0) 48%)}
+.cell.wide.img > div > *{max-width:40ch}
+@media (max-width:860px){.cell.wide.img > div::after{background:linear-gradient(180deg,rgba(255,255,255,0) 20%,rgba(255,255,255,.92) 62%)}.cell.wide.img > div > *{max-width:none}}
+/* interacción al pasar el mouse */
+.sp,.theme,figure .bezel,.journey > div,.rows > div,.run > div,.tbl{transition:transform .6s var(--ease),box-shadow .6s var(--ease),border-color .6s var(--ease),background .6s var(--ease)}
+.ph,figure .bezel{overflow:hidden}
+.ph img,figure img,.steps img{transition:transform 1s var(--ease),filter .8s var(--ease)}
+@media (hover:hover){
+  .sp:hover{transform:translateY(-8px);border-color:rgba(246,182,14,.55);box-shadow:0 40px 70px -36px rgba(60,48,110,.55)}
+  .sp:hover .ph img{transform:scale(1.06);filter:contrast(1.08) saturate(1.1)}
+  .sp:hover h3{color:var(--gold-ink)}
+  .sp h3,.theme h3,.rows h3,.run h3{transition:color .5s var(--ease)}
+  .theme:hover{transform:translateY(-4px);background:#fff;box-shadow:0 34px 60px -34px rgba(60,48,110,.45),inset 4px 0 0 var(--gold)}
+  .theme:hover h3{color:var(--gold-ink)}
+  figure:hover .bezel{transform:translateY(-6px);box-shadow:0 44px 80px -36px rgba(60,48,110,.6)}
+  figure:hover img{transform:scale(1.05);filter:contrast(1.08) saturate(1.12)}
+  .cell:hover{transform:translateY(-6px);border-color:rgba(246,182,14,.45)}
+  .cell.img:hover > div::before{transform:scale(1.06);filter:contrast(1.08) saturate(1.1)}
+  .cell:not(.img):hover > div{background:radial-gradient(120% 90% at 100% 0%,rgba(246,182,14,.2),transparent 60%),#fff}
+  .rows > div:hover h3,.run > div:hover h3{color:var(--gold-ink)}
+  .rows > div:hover{transform:translateX(6px)}
+  .run > div:hover{background:linear-gradient(90deg,rgba(246,182,14,.12),transparent 70%);transform:translateX(4px)}
+  .journey > div:hover{transform:translateX(4px)}
+  .tbl:hover{box-shadow:0 34px 60px -30px rgba(60,48,110,.5)}
+  tbody tr:not(.cat):not(.grand):hover td{background:rgba(246,182,14,.08)}
+  .steps div:hover img{transform:translateY(-8px) scale(1.06) rotate(-2deg)}
+  .kpi{transition:transform .6s var(--ease)}
+  .kpi:hover{transform:scale(1.02)}
+  .sw{transition:transform .4s var(--ease)}
+  .sw:hover{transform:translateY(-3px)}
+}
+@media (prefers-reduced-motion:reduce){.sp,.theme,figure .bezel,.cell,.rows > div,.run > div,.journey > div,.ph img,figure img,.steps img,.kpi{transition:none!important;transform:none!important}}
 .js .rv{transition:opacity .9s var(--ease),transform .9s var(--ease)}
 .js .rv.pre{opacity:0;transform:translateY(32px)}
 @media (prefers-reduced-motion:reduce){.js .rv,.js .rv.pre{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
@@ -372,7 +405,7 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
 <section class="wrap" id="tecnica">
   <h2 class="rv">Producción técnica</h2>
   <div class="bento">
-    <div class="cell wide img rv" style="--img:url(set1.jpg)"><div><h3>Escenario virtual 3D</h3><p>Diseño y modelado del set con la identidad de Banco Popular, motor de render en tiempo real y operador de escenario durante ensayo y transmisión.</p><em>Cambios de ambiente por bloque y pantallas virtuales en vivo.</em></div></div>
+    <div class="cell wide img rv" style="--img:url(set1.jpg);--pos:62% 12%"><div><h3>Escenario virtual 3D</h3><p>Diseño y modelado del set con la identidad de Banco Popular, motor de render en tiempo real y operador de escenario durante ensayo y transmisión.</p><em>Cambios de ambiente por bloque y pantallas virtuales en vivo.</em></div></div>
     <div class="cell big glow rv"><div><h3>Estudio croma</h3><p>Cámaras, iluminación, teleprompter para el experto y monitores de retorno para ver presentaciones y participantes.</p><em>Ensayo técnico completo el día anterior.</em></div></div>
     <div class="cell big rv"><div><h3>Transmisión</h3><p>Master de transmisión, switcher, integrador de gráficos y presentaciones, licencia de streaming en alta definición y grabación de respaldo.</p><em>Paquete gráfico con cortinillas y créditos en pantalla.</em></div></div>
     <div class="cell rv"><div><h3>Audio</h3><p>Micrófonos de diadema con retorno in-ear para el experto y el moderador, consola y técnico de audio.</p></div></div>
