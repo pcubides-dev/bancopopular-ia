@@ -1,0 +1,524 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<title>Inteligencia Popular</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:Tanker;src:url(Tanker-Regular.woff2) format('woff2');font-display:swap}
+@font-face{font-family:Satoshi;src:url(Satoshi-500.woff2) format('woff2');font-weight:400 500;font-display:swap}
+@font-face{font-family:Satoshi;src:url(Satoshi-700.woff2) format('woff2');font-weight:600 700;font-display:swap}
+:root{
+  --bg:#F3F1ED; --bg2:#FFFFFF; --hair:rgba(22,22,27,.10);
+  --ink:#16161B; --soft:#45424F; --mute:#7C7886;
+  --gold:#F6B60E; --gold-ink:#946500;
+  --bp-deep:#0B3642; --bp-pet:#105163; --bp-green:#27C112; --bp-orange:#F99B35;
+  --display:Tanker,Impact,"Arial Narrow",sans-serif;
+  --body:Satoshi,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Chivo Mono",ui-monospace,Menlo,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --r-out:22px; --r-in:16px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;overflow-x:clip}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.65;margin:0;overflow-x:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.05;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:clamp(16px,4vw,56px)}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-transform:uppercase;line-height:.92;margin:0;text-wrap:balance}
+h2{font-size:clamp(40px,5.4vw,72px)}
+p{margin:0;color:var(--soft);max-width:62ch;text-wrap:pretty}
+.stripe{height:3px;background:linear-gradient(90deg,#20C4D8 0 12%,#7B4DFF 12% 25%,#D13DDB 25% 37%,#F2512B 37% 50%,#F6B60E 50% 62%,#C8F31D 62% 75%,#20C4D8 75% 87%,#7B4DFF 87%)}
+
+.nav{position:fixed;left:50%;transform:translateX(-50%);top:14px;z-index:4;display:flex;gap:2px;padding:5px;border-radius:999px;background:rgba(255,255,255,.62);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 30px -18px rgba(60,48,110,.35)}
+.nav a{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--soft);text-decoration:none;padding:7px 12px;border-radius:999px;transition:background .4s var(--ease),color .4s var(--ease)}
+.nav a:hover{background:rgba(22,22,27,.06);color:var(--ink)}
+
+section,.hero{position:relative;isolation:isolate}
+section::before,.hero::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;left:50%;width:100vw;margin-left:-50vw;pointer-events:none}
+.hero::before{background:url(hero.jpg) 70% 40%/cover no-repeat}
+#idea::before{background:url(bg-donde.jpg) center top/cover no-repeat;-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
+#conferencista::before{background:radial-gradient(50% 50% at 85% 20%,rgba(246,182,14,.10),transparent 70%),radial-gradient(45% 45% at 5% 80%,rgba(123,77,255,.08),transparent 70%)}
+#tecnica::before{background:url(bg-capacidades.jpg) center/cover no-repeat}
+#formato::before{background:radial-gradient(60% 50% at 50% 40%,rgba(123,77,255,.08),transparent 70%)}
+#presupuesto::before{background:linear-gradient(#F3F1ED,#FFFFFF 30%,#F3F1ED)}
+
+.hero{padding-block:clamp(84px,9vw,110px) clamp(72px,9vw,120px);min-height:min(92vh,820px)}
+.hero-panel{padding:clamp(24px,3.4vw,44px);max-width:640px}
+.logos{display:flex;align-items:center;gap:18px;margin-bottom:clamp(32px,5vw,56px)}
+.logo{width:clamp(180px,20vw,260px);height:auto;display:block;filter:brightness(0)}
+.logos span{font-family:var(--mono);font-size:14px;color:var(--mute)}
+.logos img.bp{height:clamp(22px,2.2vw,28px);width:auto}
+.slate{display:inline-grid;grid-template-columns:repeat(3,auto);margin:0;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.slate div{padding:10px 22px 10px 0;margin-right:22px;border-right:1px solid var(--hair)}
+.slate div:last-child{border-right:0;margin-right:0}
+.slate dt{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+.slate dd{margin:2px 0 0;font-family:var(--display);font-size:20px;text-transform:uppercase;color:var(--ink)}
+.hero h1{font-size:clamp(52px,7vw,104px);margin-top:24px}
+.hero h1 span{display:block}
+em.mk,.hero h1 em,.close h2 em{font-style:normal;color:var(--ink);background:linear-gradient(transparent 56%,var(--gold) 56%,var(--gold) 90%,transparent 90%);padding-inline:.06em}
+.lead{margin-top:24px;font-size:clamp(16px,1.5vw,19px)}
+.cta{display:inline-flex;align-items:center;gap:14px;margin-top:32px;padding:6px 6px 6px 22px;border-radius:999px;background:var(--gold);color:#111114;font-family:var(--mono);font-size:13px;font-weight:500;text-decoration:none;border:0;cursor:pointer;transition:transform .5s var(--ease)}
+.cta i{width:34px;height:34px;border-radius:50%;background:rgba(17,17,20,.12);display:grid;place-items:center;font-style:normal;transition:transform .5s var(--ease)}
+.cta:hover i{transform:translate(2px,2px) scale(1.06)}
+.cta:active{transform:scale(.98)}
+
+.glass{background:rgba(255,255,255,.58);border:1px solid rgba(255,255,255,.9);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-radius:28px;box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 30px 60px -36px rgba(60,48,110,.35)}
+.bezel{padding:6px;border-radius:var(--r-out);background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 34px 70px -34px rgba(60,48,110,.45)}
+.bezel > *{border-radius:var(--r-in);display:block;width:100%}
+video{display:block;background:#0B0B0E;max-width:100%}
+section{padding-block:clamp(88px,11vw,144px)}
+
+.split{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,6vw,96px);align-items:start}
+.split .side{position:sticky;top:110px;padding:clamp(24px,3vw,40px)}
+.split .side p{margin-top:16px}
+.rows > div{padding-block:30px;border-top:1px solid var(--hair)}
+.rows h3{font-size:clamp(26px,3vw,36px);margin-bottom:10px}
+
+/* conferencistas */
+.speakers{margin-top:clamp(40px,6vw,64px);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+.sp{grid-column:span 3;border-radius:var(--r-out);padding:6px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.95);box-shadow:0 26px 50px -34px rgba(60,48,110,.4)}
+.sp > div{height:100%;border-radius:var(--r-in);background:var(--bg2);padding:clamp(22px,2.4vw,32px);display:flex;flex-direction:column;gap:12px}
+.sp.main{grid-column:span 6}
+.sp.main > div{background:radial-gradient(100% 120% at 100% 0%,rgba(246,182,14,.14),transparent 55%),var(--bg2);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(20px,4vw,56px)}
+.sp.sm{grid-column:span 2}
+.sp h3{font-size:clamp(28px,3vw,40px)}
+.sp.sm h3{font-size:clamp(24px,2.2vw,30px)}
+.ph{border-radius:14px;overflow:hidden;background:#E8E4DD}
+.ph img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:50% 15%}
+.sp.main .ph{max-width:300px}
+.sp:not(.main) > div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:22px;align-content:start}
+.sp:not(.main) .ph{align-self:start}
+.sp:not(.main) .info{display:flex;flex-direction:column;gap:12px;min-width:0}
+.speakers.trio .sp{grid-column:span 2}
+.speakers.trio .sp > div{display:flex;flex-direction:column;gap:12px}
+.speakers.trio .ph{margin-bottom:6px;align-self:stretch}
+.speakers.trio .sp p.fit{font-size:14.5px}
+.sp .role{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--gold-ink);line-height:1.5}
+.sp p{font-size:15px}
+.sp .fit{font-size:14.5px;border-top:1px solid var(--hair);padding-top:12px;margin-top:auto}
+.sp .fit b{font-weight:600;color:var(--ink)}
+.tag{align-self:flex-start;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;background:var(--gold);color:#111;padding:5px 10px;border-radius:999px}
+.note{margin-top:22px;font-family:var(--mono);font-size:12px;color:var(--mute);max-width:80ch}
+
+/* temas */
+.themes{margin-top:clamp(40px,6vw,64px);display:grid;gap:14px}
+.theme{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(20px,4vw,56px);padding:clamp(24px,3vw,40px);border-radius:28px;background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);box-shadow:0 26px 50px -36px rgba(60,48,110,.35)}
+.theme h3{font-size:clamp(30px,3.6vw,48px)}
+.theme .when{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:14px}
+.theme dl{margin:0;display:grid;gap:16px}
+.theme dt{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-ink)}
+.theme dd{margin:4px 0 0;color:var(--soft);font-size:15.5px}
+.theme.closing{background:radial-gradient(90% 120% at 0% 100%,rgba(246,182,14,.16),transparent 60%),rgba(255,255,255,.7)}
+
+/* escenario */
+.stage-hero{margin-top:clamp(40px,6vw,64px)}
+.stage-hero img{aspect-ratio:16/9;object-fit:cover}
+.stage-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(16px,3vw,40px);margin-top:clamp(16px,3vw,40px);align-items:start}
+.stage-pair figure:nth-child(2){margin-top:clamp(0px,6vw,80px)}
+figure{margin:0}
+figure img{aspect-ratio:16/9;object-fit:cover}
+figcaption{margin-top:14px;font-size:15px;color:var(--soft);max-width:52ch}
+figcaption b{display:block;font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(22px,2.2vw,28px);color:var(--ink);line-height:1;margin-bottom:6px}
+.stage-txt{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,72px);margin-top:clamp(48px,7vw,88px)}
+.stage-txt > div,.agenda > *,.budget > *,.theme > *,.split > *{min-width:0}
+.stage-txt h3{font-size:clamp(26px,2.8vw,34px);margin-bottom:10px}
+.swatches{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.sw{display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border-radius:999px;background:#fff;border:1px solid var(--hair);font-family:var(--mono);font-size:11.5px;color:var(--soft)}
+.sw i{width:26px;height:26px;border-radius:50%;display:block}
+.bplogo{display:flex;align-items:center;gap:14px;margin-top:18px;padding:14px 18px;border-radius:16px;background:var(--bp-deep);max-width:100%;flex-wrap:wrap}
+.bplogo img{height:26px;width:auto}
+.bplogo span{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.7)}
+
+/* agenda */
+.agenda{margin-top:clamp(40px,6vw,64px);display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:clamp(24px,5vw,72px);align-items:start}
+.run{border-top:1px solid var(--hair)}
+.run > div{display:grid;grid-template-columns:96px minmax(0,1fr);gap:18px;padding-block:18px;border-bottom:1px solid var(--hair)}
+.run time{font-family:var(--display);font-size:24px;color:var(--gold-ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.run h3{font-size:clamp(20px,2vw,24px);margin-bottom:4px}
+.run p{font-size:15px}
+.journey{padding:clamp(24px,3vw,36px);position:sticky;top:110px}
+.journey > div + div{margin-top:22px;padding-top:22px;border-top:1px solid var(--hair)}
+.journey h3{font-size:clamp(22px,2.2vw,28px);margin-bottom:8px}
+.journey p{font-size:15px}
+
+/* técnica bento */
+.bento{margin-top:clamp(40px,6vw,64px);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.cell{grid-column:span 2;border-radius:var(--r-out);padding:6px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.95);box-shadow:0 26px 50px -34px rgba(60,48,110,.4);transition:transform .7s var(--ease)}
+.cell:hover{transform:translateY(-4px)}
+.cell > div{position:relative;height:100%;min-height:250px;border-radius:var(--r-in);background:var(--bg2);padding:clamp(22px,2.4vw,30px);display:flex;flex-direction:column;gap:10px;overflow:hidden;isolation:isolate}
+.cell.big{grid-column:span 3}
+.cell.wide{grid-column:span 6}
+.cell.wide > div{min-height:320px;justify-content:flex-end}
+.cell.wide > div > *{max-width:52ch}
+.cell.img > div::before{content:"";position:absolute;inset:0;z-index:-2;background:var(--img) center/cover no-repeat}
+.cell.img > div::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.85) 38%,rgba(255,255,255,0) 70%)}
+.cell.glow > div{background:radial-gradient(120% 90% at 100% 0%,rgba(246,182,14,.12),transparent 55%),var(--bg2)}
+.cell h3{font-size:clamp(22px,2.2vw,28px)}
+.cell p{font-size:15px}
+.cell em{margin-top:auto;padding-top:12px;font-style:normal;font-family:var(--mono);font-size:11.5px;line-height:1.55;color:var(--gold-ink)}
+.cell.wide em{margin-top:0}
+
+/* casos */
+.meta{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:14px}
+.case{padding-block:clamp(40px,6vw,80px)}
+.case h3{font-size:clamp(32px,4vw,52px)}
+.case p:not(.meta){margin-top:18px}
+.v916{aspect-ratio:9/16;object-fit:cover}
+.v169{aspect-ratio:16/9;object-fit:cover;width:100%}
+.split-case{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(28px,6vw,88px);align-items:center}
+.split-case .media{justify-self:center}
+.split-case .v916{height:min(600px,72vh);width:auto}
+.cine-txt{max-width:760px;margin-top:clamp(24px,3vw,36px)}
+.popular{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(24px,5vw,72px);align-items:center;padding:clamp(24px,3vw,40px)}
+
+/* proceso */
+.steps{position:relative;margin-top:clamp(40px,6vw,72px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(16px,2.5vw,32px)}
+.steps::before{content:"";position:absolute;z-index:-1;left:12%;right:12%;top:calc(clamp(96px,10vw,140px) / 2);height:2px;background:linear-gradient(90deg,var(--gold),#9C8CF0 50%,var(--gold));opacity:.55}
+.steps div{position:relative;min-width:0;text-align:center}
+.steps img{display:block;width:auto;height:clamp(96px,10vw,140px);max-width:80%;object-fit:contain;margin:0 auto 22px}
+.steps h3{font-size:clamp(24px,2.4vw,30px);margin-bottom:10px}
+.steps p{font-size:15px;margin-inline:auto;max-width:28ch}
+
+/* presupuesto */
+.budget{margin-top:clamp(40px,6vw,64px);display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr);gap:clamp(24px,4vw,56px);align-items:start}
+.tbl{border-radius:var(--r-out);padding:6px;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.95);box-shadow:0 26px 50px -34px rgba(60,48,110,.4)}
+.tbl > div{background:#fff;border-radius:var(--r-in);padding:clamp(18px,2.4vw,30px)}
+.tbl h3{font-size:clamp(24px,2.4vw,32px);margin-bottom:6px}
+.tbl .sub{font-size:14.5px;margin-bottom:18px}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{text-align:left;padding:11px 0;border-bottom:1px solid var(--hair);vertical-align:top}
+th{font-family:var(--mono);font-weight:400;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;padding-left:16px}
+td small{display:block;color:var(--mute);font-size:13px;line-height:1.45;margin-top:2px}
+tr.cat td{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-ink);padding-top:22px;border-bottom:0}
+tr.tot td{font-weight:600;color:var(--ink);border-bottom:0}
+tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-transform:uppercase;border-top:2px solid var(--ink);border-bottom:0;padding-top:14px}
+.tbl + .tbl{margin-top:16px}
+.kpi{background:var(--gold);border-radius:var(--r-out);padding:clamp(24px,3vw,36px)}
+.kpi span{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#3a2a00}
+.kpi b{display:block;font-family:var(--display);font-weight:400;font-size:clamp(40px,4.6vw,60px);line-height:1;color:#111;margin-top:10px;font-variant-numeric:tabular-nums}
+.kpi p{color:#3a2a00;font-size:14px;margin-top:10px}
+.aside-stack{display:grid;gap:14px;position:sticky;top:110px}
+.mini{padding:clamp(20px,2.4vw,28px)}
+.mini h3{font-size:22px;margin-bottom:6px}
+.mini p{font-size:14.5px}
+.mini b.v{display:block;font-family:var(--display);font-weight:400;font-size:32px;color:var(--gold-ink);margin-top:8px;font-variant-numeric:tabular-nums}
+
+.close{text-align:center;padding-block:clamp(96px,12vw,150px) clamp(72px,8vw,110px)}
+.close::before{background:url(bg-cierre.jpg) center 60%/cover no-repeat}
+.endmark{display:block;width:min(820px,86vw);height:auto;margin:clamp(96px,12vw,160px) auto 0;filter:brightness(0);-webkit-box-reflect:below 4px linear-gradient(transparent 55%,rgba(255,255,255,.22))}
+.close h2{font-size:clamp(44px,7vw,100px)}
+.close p{margin:22px auto 0}
+.close-panel{max-width:860px;margin-inline:auto;padding:clamp(32px,5vw,64px) clamp(20px,4vw,56px)}
+.contact{margin-top:30px;display:inline-flex;flex-direction:column;align-items:center;gap:14px}
+.contact strong{font-weight:500;font-size:16px}
+.contact .cta{margin-top:0}
+.small{font-family:var(--mono);font-size:12px;color:var(--mute)}
+
+.js .rv{transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.js .rv.pre{opacity:0;transform:translateY(32px)}
+@media (prefers-reduced-motion:reduce){.js .rv,.js .rv.pre{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+
+@media (max-width:860px){
+  .nav{display:none}
+  .hero{padding-top:48px;min-height:0}
+  .hero::before{background-position:80% 30%;opacity:.55}
+  .split,.split-case,.theme,.stage-pair,.stage-txt,.agenda,.budget,.popular,.sp.main > div{grid-template-columns:1fr}
+  .split .side,.journey,.aside-stack{position:static}
+  .speakers,.bento{grid-template-columns:1fr}
+  .sp,.sp.main,.sp.sm,.cell,.cell.big,.cell.wide{grid-column:auto}
+  .stage-pair figure:nth-child(2){margin-top:0}
+  .split-case .v916{height:auto;width:min(100%,340px)}
+  .cell.img > div::after{background:linear-gradient(180deg,rgba(255,255,255,0) 20%,rgba(255,255,255,.92) 62%)}
+  .steps{grid-template-columns:1fr 1fr}
+  .steps::before{display:none}
+  .slate div{padding-right:12px;margin-right:12px}.slate dd{font-size:16px}
+  .run > div{grid-template-columns:72px minmax(0,1fr)}
+  table{font-size:13.5px}
+}
+@media (max-width:480px){.sp:not(.main) > div{grid-template-columns:1fr}.sp:not(.main) .ph{max-width:220px}.steps{grid-template-columns:1fr}.logos{flex-wrap:wrap;gap:12px}}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+</style>
+
+<div class="stripe"></div>
+<nav class="nav" aria-label="Secciones">
+  <a href="#idea">Idea</a><a href="#conferencista">Conferencistas</a><a href="#contenidos">Contenidos</a><a href="#escenario">Escenario</a><a href="#formato">Formato</a><a href="#tecnica">Técnica</a><a href="#presupuesto">Presupuesto</a>
+</nav>
+
+<header class="wrap hero">
+  <div class="logos"><img class="logo" src="wordmark.png" alt="Wonderlust"><span>×</span><img class="bp" src="bp-logo-verde.png" alt="Banco Popular"></div>
+  <div class="glass hero-panel">
+    <dl class="slate"><div><dt>Para</dt><dd>Banco Popular</dd></div><div><dt>Formato</dt><dd>Evento virtual</dd></div><div><dt>Fecha</dt><dd>Octubre 2026</dd></div></dl>
+    <h1><span>Inteligencia</span><span><em>Popular</em></span></h1>
+    <p class="lead">Una conferencia y una conversación sobre IA en la banca, donde 300 personas también ponen su inteligencia.</p>
+    <a class="cta" href="#idea">Ver la propuesta<i aria-hidden="true">↓</i></a>
+  </div>
+</header>
+
+<section class="wrap" id="idea">
+  <div class="split">
+    <div class="side glass rv"><h2>La idea</h2><p>El nombre junta las dos inteligencias que se van a encontrar en el evento: la que aprende de datos y la que Banco Popular ha construido con su gente durante 75 años.</p></div>
+    <div class="rows">
+      <div class="rv"><h3>El punto de partida</h3><p>Banco Popular acompaña a uno de cada cuatro pensionados del país y tiene más de 500 clientes centenarios. Su oficio es la cercanía y la paciencia. La IA llega a una velocidad muy distinta, y esa diferencia merece una conversación honesta con el equipo.</p></div>
+      <div class="rv"><h3>Dos inteligencias en el mismo set</h3><p>Un experto explica hacia dónde va la IA y qué significa para la banca. Mientras tanto, los 300 participantes alimentan en vivo una IA en el escenario con lo que saben de su trabajo. Al final, esa IA les devuelve lo que construyeron juntos.</p></div>
+      <div class="rv"><h3>La pregunta de 100 años</h3><p>El evento abre con un cliente centenario del banco que le hace una pregunta a la inteligencia artificial, con sus palabras. Al cierre, la respuesta llega desde lo que dijeron los 300 participantes.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="conferencista">
+  <div class="rv" style="max-width:760px"><h2>Conferencistas</h2><p style="margin-top:18px">Tres perfiles con base en Bogotá que conectan la inteligencia artificial con la banca, la transformación de las empresas y la nueva economía. Pueden repartirse los tres bloques o elegirse uno para toda la jornada, según disponibilidad.</p></div>
+  <div class="speakers trio">
+    <article class="sp rv"><div>
+      <div class="ph"><img src="sp-covelli.jpg" alt="Santiago Covelli"></div>
+      <h3>Santiago Covelli</h3>
+      <p class="role">Banca digital, innovación e inteligencia artificial</p>
+      <p>Cofundador y expresidente de Lulo Bank, primer banco 100% digital con licencia en Colombia. Su experiencia en el ecosistema financiero digital le permite abordar cómo la tecnología está transformando la banca, los modelos de atención y la relación con los clientes.</p>
+      <p class="fit">Puede aportar una mirada estratégica sobre las oportunidades que abre la IA, los cambios que exige y cómo prepararse para competir en esta nueva economía.</p>
+    </div></article>
+    <article class="sp rv"><div>
+      <div class="ph"><img src="sp-duque.jpg" alt="María Paula Duque"></div>
+      <h3>María Paula Duque</h3>
+      <p class="role">Inteligencia artificial y transformación empresarial</p>
+      <p>Exviceministra de Telecomunicaciones, directora en Microsoft Colombia durante más de diez años y Chief Customer Experience de Avianca. Ha integrado juntas directivas como las de Credibanco, Seguros Bolívar y la Cámara de Comercio de Bogotá.</p>
+      <p class="fit">Puede profundizar en cómo las entidades financieras incorporan estas capacidades, preparan a sus equipos y convierten la IA en productividad, innovación y valor para sus clientes.</p>
+    </div></article>
+    <article class="sp rv"><div>
+      <div class="ph"><img src="sp-estefan.jpg" alt="Samir Estefan"></div>
+      <h3>Samir Estefan</h3>
+      <p class="role">IA, tecnología y la nueva economía</p>
+      <p>Cofundador de TECHcetera, evangelista tecnológico y consultor en transformación digital. Trabajó en multinacionales de tecnología y de banca, y es invitado permanente en radio y televisión para hablar de tecnología.</p>
+      <p class="fit">Puede explorar cómo la IA está cambiando las reglas de juego, qué capacidades necesitan las organizaciones y cómo la banca puede anticiparse a este nuevo entorno.</p>
+    </div></article>
+  </div>
+  <p class="note rv">Para el bloque de conversación sugerimos sumar a un líder de Banco Popular junto a los conferencistas. Honorarios y disponibilidad se confirman con cada conferencista.</p>
+</section>
+
+<section class="wrap" id="contenidos">
+  <h2 class="rv">Estructura de contenidos</h2>
+  <div class="themes">
+    <article class="theme rv">
+      <div><p class="when">Bloque 1 · 20 min · Conferencia</p><h3>¿Por qué la IA puede cambiar el mundo?</h3></div>
+      <dl>
+        <div><dt>Enfoque</dt><dd>Qué cambió con la IA generativa, qué está pasando hoy en la banca global y regional, y por qué esta ola tecnológica se mueve distinto a las anteriores.</dd></div>
+        <div><dt>Participación</dt><dd>Primer pulso en vivo: ¿qué tarea de tu día le entregarías mañana a la IA?</dd></div>
+        <div><dt>En el escenario</dt><dd>El ventanal muestra un río de datos tranquilo, a escala global.</dd></div>
+      </dl>
+    </article>
+    <article class="theme rv">
+      <div><p class="when">Bloque 2 · 20 min · Conferencia</p><h3>¿Cómo adaptarnos a la IA?</h3></div>
+      <dl>
+        <div><dt>Enfoque</dt><dd>Las capacidades que necesita una organización, casos aplicados en banca como atención, riesgo, fraude y procesos, y el lugar de las personas en ese cambio.</dd></div>
+        <div><dt>Participación</dt><dd>Segundo pulso: ¿qué parte de tu trabajo no le entregarías nunca?</dd></div>
+        <div><dt>En el escenario</dt><dd>El ventanal se abre a una ciudad conectada, donde la IA ya trabaja.</dd></div>
+      </dl>
+    </article>
+    <article class="theme rv">
+      <div><p class="when">Bloque 3 · 20 min · Conversación</p><h3>El debate y el ritmo de la IA</h3></div>
+      <dl>
+        <div><dt>Enfoque</dt><dd>Conversación moderada entre el experto y un líder de Banco Popular sobre la velocidad de la IA, la regulación, la ética, la confianza del cliente mayor y los retos de la banca.</dd></div>
+        <div><dt>Participación</dt><dd>Preguntas de los participantes en vivo, filtradas por el moderador.</dd></div>
+        <div><dt>En el escenario</dt><dd>El flujo de datos se acelera detrás de la conversación.</dd></div>
+      </dl>
+    </article>
+    <article class="theme closing rv">
+      <div><p class="when">Cierre · 10 min</p><h3>El manifiesto de los 300</h3></div>
+      <dl>
+        <div><dt>Qué pasa</dt><dd>La IA del escenario agrupa las respuestas de los participantes y muestra en el ventanal lo que delegarían y lo que consideran suyo. Con eso se responde la pregunta del cliente centenario.</dd></div>
+        <div><dt>Qué se llevan</dt><dd>Una pieza con el manifiesto, enviada a cada participante después del evento.</dd></div>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<section class="wrap" id="escenario">
+  <div class="rv" style="max-width:760px"><h2>Diseño de escenario</h2><p style="margin-top:18px">Una sala cálida, con madera, plantas y luz de lámpara, que representa la cercanía del banco. Detrás, un ventanal de piso a techo por donde fluye la IA en el verde de Banco Popular. El ventanal cambia con cada bloque.</p></div>
+  <figure class="stage-hero rv"><div class="bezel"><img src="set1.jpg" alt="Render del escenario virtual: el conferencista de pie en una sala cálida con un gran ventanal donde fluyen datos verdes"></div><figcaption><b>Conferencia</b>El experto de pie en la tarima de madera. Detrás, el río de datos del primer bloque.</figcaption></figure>
+  <div class="stage-pair">
+    <figure class="rv"><div class="bezel"><img src="set2.jpg" alt="Render de la conversación: tres personas sentadas en sillas azul petróleo frente al ventanal con la ciudad y datos acelerados"></div><figcaption><b>Conversación</b>Moderador, experto y líder de Banco Popular. La ciudad conectada y el flujo acelerado del bloque del debate.</figcaption></figure>
+    <figure class="rv"><div class="bezel"><img src="set3.jpg" alt="Render del cierre: una mujer observa en el ventanal cientos de puntos de luz que forman una constelación"></div><figcaption><b>Cierre</b>Las respuestas de los 300 participantes aparecen como puntos de luz que forman una sola figura.</figcaption></figure>
+  </div>
+  <div class="stage-txt">
+    <div class="rv"><h3>Identidad de Banco Popular</h3><p>El azul petróleo arma la arquitectura del set, el verde vive en la luz y en los datos, y el naranja aparece solo en momentos clave. El logo va en las pantallas virtuales y en los gráficos, con la tipografía del banco.</p>
+      <div class="swatches"><span class="sw"><i style="background:#0B3642"></i>Petróleo profundo</span><span class="sw"><i style="background:#105163"></i>Petróleo</span><span class="sw"><i style="background:#27C112"></i>Verde Popular</span><span class="sw"><i style="background:#F99B35"></i>Naranja acento</span></div>
+      <div class="bplogo"><img src="bp-logo-verde.png" alt="Banco Popular"><span>Aplicación sobre petróleo</span></div>
+    </div>
+    <div class="rv"><h3>Cómo se construye</h3><p>Es un escenario virtual 3D en tiempo real. El experto se graba en croma en nuestro estudio de Bogotá y queda integrado dentro del set, con movimientos de cámara, profundidad e iluminación. Las sillas de la conversación son reales; el resto del espacio es virtual, por eso cambia de bloque a bloque sin desmontar nada.</p></div>
+  </div>
+</section>
+
+<section class="wrap" id="formato">
+  <h2 class="rv">Formato y dinámica</h2>
+  <div class="agenda">
+    <div class="run rv">
+      <div><time>−15'</time><div><h3>Sala de espera</h3><p>Cuenta regresiva con la identidad del evento y una pregunta de calentamiento.</p></div></div>
+      <div><time>00'</time><div><h3>La pregunta de 100 años</h3><p>Video de apertura con el cliente centenario y bienvenida del moderador.</p></div></div>
+      <div><time>05'</time><div><h3>Palabras de Banco Popular</h3><p>Un vocero del banco presenta el propósito del encuentro.</p></div></div>
+      <div><time>10'</time><div><h3>Bloque 1</h3><p>¿Por qué la IA puede cambiar el mundo? Primer pulso en vivo.</p></div></div>
+      <div><time>30'</time><div><h3>Bloque 2</h3><p>¿Cómo adaptarnos a la IA? Segundo pulso en vivo.</p></div></div>
+      <div><time>50'</time><div><h3>Bloque 3</h3><p>El debate y el ritmo de la IA. Conversación y preguntas del público.</p></div></div>
+      <div><time>70'</time><div><h3>El manifiesto de los 300</h3><p>La IA devuelve lo que construyeron los participantes y se cierra el evento.</p></div></div>
+      <div><time>80'</time><div><h3>Fin</h3><p>La grabación queda disponible para quienes no pudieron conectarse.</p></div></div>
+    </div>
+    <div class="journey glass rv">
+      <div><h3>Antes</h3><p>Página de registro con la imagen del evento, recordatorios por correo y una pregunta de entrada que ya alimenta a la IA del set.</p></div>
+      <div><h3>Durante</h3><p>Transmisión en alta definición para 300 personas, con chat, preguntas y dos pulsos cortos que se ven reflejados en pantalla.</p></div>
+      <div><h3>Después</h3><p>Cada participante recibe la pieza del manifiesto y el enlace a la grabación.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="tecnica">
+  <h2 class="rv">Producción técnica</h2>
+  <div class="bento">
+    <div class="cell wide img rv" style="--img:url(set1.jpg)"><div><h3>Escenario virtual 3D</h3><p>Diseño y modelado del set con la identidad de Banco Popular, motor de render en tiempo real y operador de escenario durante ensayo y transmisión.</p><em>Cambios de ambiente por bloque y pantallas virtuales en vivo.</em></div></div>
+    <div class="cell big glow rv"><div><h3>Estudio croma</h3><p>Cámaras, iluminación, teleprompter para el experto y monitores de retorno para ver presentaciones y participantes.</p><em>Ensayo técnico completo el día anterior.</em></div></div>
+    <div class="cell big rv"><div><h3>Transmisión</h3><p>Master de transmisión, switcher, integrador de gráficos y presentaciones, licencia de streaming en alta definición y grabación de respaldo.</p><em>Paquete gráfico con cortinillas y créditos en pantalla.</em></div></div>
+    <div class="cell rv"><div><h3>Audio</h3><p>Micrófonos de diadema con retorno in-ear para el experto y el moderador, consola y técnico de audio.</p></div></div>
+    <div class="cell rv"><div><h3>Plataforma para 300</h3><p>Sala para 300 conectados con chat, preguntas y encuestas, embebida en la página de registro.</p></div></div>
+    <div class="cell glow rv"><div><h3>IA en vivo</h3><p>Un operador recibe las respuestas, la IA las agrupa y el equipo las cura antes de que salgan al ventanal.</p><em>Sin datos de clientes del banco.</em></div></div>
+  </div>
+</section>
+
+<section class="wrap" id="casos">
+  <h2 class="rv">Lo hemos hecho antes</h2>
+  <article class="case cine">
+    <div class="media bezel rv"><video class="loop v169" muted loop playsinline preload="none" poster="ciencia.jpg" data-src="ciencia.mp4" aria-label="Fragmentos de transmisiones en set virtual"></video></div>
+    <div class="cine-txt rv">
+      <p class="meta">ZEISS Vision Care · Nestlé</p>
+      <h3>Contenido experto desde set virtual</h3>
+      <p>Desde nuestro estudio transmitimos contenido técnico para marcas como ZEISS y Nestlé, con sets virtuales que hacen visual la explicación del experto.</p>
+    </div>
+  </article>
+  <div class="case">
+    <div class="glass popular rv">
+      <h3 style="font-size:clamp(30px,3.6vw,46px)">Ya conocemos la voz de Banco Popular</h3>
+      <p>Producimos el manifiesto audiovisual del Encuentro Popular 2026 y las piezas de reconocimiento a sus protagonistas. Llegamos a este evento conociendo el tono y la identidad del banco.</p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="proceso">
+  <h2 class="rv">Cómo lo hacemos</h2>
+  <div class="steps">
+    <div class="rv"><img src="paso1.png" alt="Bombillo de cristal"><h3>Concepto</h3><p>Ajustamos la idea, el guion del evento y las preguntas con el equipo de Banco Popular.</p></div>
+    <div class="rv"><img src="paso2.png" alt="Cubo de cristal con capas"><h3>Contenido</h3><p>Trabajamos con el experto el enfoque de los tres bloques y producimos el video de apertura.</p></div>
+    <div class="rv"><img src="paso3.png" alt="Piezas de rompecabezas de cristal"><h3>Ensayo</h3><p>Un día completo en estudio para probar escenario, audio, IA en vivo y transmisión.</p></div>
+    <div class="rv"><img src="paso4.png" alt="Claqueta de cristal"><h3>En vivo</h3><p>Transmisión, moderación de la participación y entrega del manifiesto y la grabación.</p></div>
+  </div>
+</section>
+
+<section class="wrap" id="presupuesto">
+  <h2 class="rv">Presupuesto</h2>
+  <div class="budget">
+    <div>
+      <div class="tbl rv"><div>
+        <h3>Evento virtual</h3>
+        <p class="sub">Conferencia y conversación en estudio, transmisión para 300 participantes. Valores en pesos colombianos.</p>
+        <table>
+          <thead><tr><th>Concepto</th><th class="n">Valor</th></tr></thead>
+          <tbody>
+            <tr class="cat"><td colspan="2">Conferencista</td></tr>
+            <tr><td>Honorarios del experto<small>Según el perfil elegido. Se confirma con disponibilidad.</small></td><td class="n">Por confirmar</td></tr>
+            <tr><td>Búsqueda, propuesta y gestión del conferencista</td><td class="n">Incluido</td></tr>
+            <tr><td>Viáticos del conferencista<small>No aplica: los tres conferencistas tienen base en Bogotá.</small></td><td class="n">Si aplica</td></tr>
+            <tr class="cat"><td colspan="2">Contenidos y formato</td></tr>
+            <tr><td>Estructura de contenidos y escaleta</td><td class="n">$923.077</td></tr>
+            <tr><td>Formato, dinámica y coordinación de contenidos</td><td class="n">$1.307.692</td></tr>
+            <tr><td>Ensayo técnico previo</td><td class="n">$2.000.000</td></tr>
+            <tr class="cat"><td colspan="2">Escenario virtual</td></tr>
+            <tr><td>Diseño del escenario virtual 3D</td><td class="n">$2.151.178</td></tr>
+            <tr><td>Escenario de realidad extendida, software y hardware</td><td class="n">$2.490.769</td></tr>
+            <tr><td>Operador de escenario 3D<small>Ensayo y transmisión, 2 turnos.</small></td><td class="n">$2.461.538</td></tr>
+            <tr class="cat"><td colspan="2">Estudio y equipos</td></tr>
+            <tr><td>Kit de ejecución técnica en estudio croma</td><td class="n">$1.335.165</td></tr>
+            <tr><td>Teleprompter y monitores de retorno</td><td class="n">$698.526</td></tr>
+            <tr><td>Consola de audio</td><td class="n">$307.692</td></tr>
+            <tr><td>Micrófonos de diadema con in-ear<small>2 unidades.</small></td><td class="n">$373.846</td></tr>
+            <tr class="cat"><td colspan="2">Plataforma y transmisión</td></tr>
+            <tr><td>Licencia de streaming HD</td><td class="n">$2.686.154</td></tr>
+            <tr><td>Plataforma para 300 participantes</td><td class="n">$1.042.857</td></tr>
+            <tr><td>Master de transmisión en estudio</td><td class="n">$1.892.308</td></tr>
+            <tr class="cat"><td colspan="2">Personal técnico</td></tr>
+            <tr><td>Integrador de transmisión<small>2 turnos.</small></td><td class="n">$1.538.462</td></tr>
+            <tr><td>Técnico de audio<small>2 turnos.</small></td><td class="n">$769.230</td></tr>
+            <tr><td>Runner<small>2 turnos.</small></td><td class="n">$692.308</td></tr>
+            <tr class="cat"><td colspan="2">Gráficos</td></tr>
+            <tr><td>Paquete gráfico de transmisión</td><td class="n">$1.230.769</td></tr>
+            <tr class="tot"><td>Subtotal</td><td class="n">$23.901.571</td></tr>
+            <tr><td>IVA 19%</td><td class="n">$4.541.298</td></tr>
+            <tr class="grand"><td>Total</td><td class="n">$28.442.869</td></tr>
+          </tbody>
+        </table>
+      </div></div>
+
+      <div class="tbl rv"><div>
+        <h3>La pregunta de 100 años</h3>
+        <p class="sub">Video de apertura con un cliente centenario del banco. Una jornada de rodaje en su casa, con enfermería en set y autorizaciones de uso de imagen.</p>
+        <table>
+          <thead><tr><th>Concepto</th><th class="n">Valor</th></tr></thead>
+          <tbody>
+            <tr><td>Preproducción<small>Guion, dirección creativa, casting con apoyo del banco y autorizaciones.</small></td><td class="n">$4.166.667</td></tr>
+            <tr><td>Equipo de rodaje, 1 jornada<small>Dirección, fotografía, luces, sonido, maquillaje y enfermería.</small></td><td class="n">$6.499.999</td></tr>
+            <tr><td>Equipos técnicos<small>Cámara de cine, iluminación suave y sonido directo.</small></td><td class="n">$9.256.410</td></tr>
+            <tr><td>Logística y talento<small>Transporte, alimentación y reconocimiento al cliente.</small></td><td class="n">$2.500.000</td></tr>
+            <tr><td>Postproducción<small>Edición, diseño sonoro y subtítulos.</small></td><td class="n">$4.527.273</td></tr>
+            <tr class="tot"><td>Subtotal</td><td class="n">$26.950.349</td></tr>
+            <tr><td>IVA 19%</td><td class="n">$5.120.566</td></tr>
+            <tr class="grand"><td>Total</td><td class="n">$32.070.915</td></tr>
+          </tbody>
+        </table>
+      </div></div>
+    </div>
+
+    <div class="aside-stack">
+      <div class="kpi rv"><span>Evento virtual · total con IVA</span><b>$28.442.869</b><p>Sin honorarios del conferencista, que dependen del perfil elegido.</p></div>
+      <div class="glass mini rv"><h3>IA en vivo</h3><p>Desarrollo de la mecánica del manifiesto, operador durante el evento y pieza final para los participantes.</p><b class="v">Por cotizar</b></div>
+      <div class="glass mini rv"><h3>Moderador profesional</h3><p>Opcional. Conducción del evento y del bloque de conversación.</p><b class="v">$1.846.154</b><p class="small" style="margin-top:6px">Antes de IVA</p></div>
+      <p class="note">Valores sujetos a confirmación de fecha y a negociación final con proveedores.</p>
+    </div>
+  </div>
+</section>
+
+<section class="close" id="contacto">
+  <div class="wrap"><div class="glass close-panel">
+    <h2>Hablemos de<br><em>Inteligencia Popular</em></h2>
+    <p>Revisemos juntos la fecha, el conferencista y la apertura, y ajustamos la propuesta.</p>
+    <div class="contact">
+      <strong>Paula Cubides, Gerente General</strong>
+      <button class="cta" id="copy" type="button"><span id="mail">pcubides@wonderlust.live</span><i aria-hidden="true">↗</i></button>
+      <span class="small" id="copied" aria-live="polite">wonderlust.live</span>
+    </div>
+    </div>
+    <img class="endmark" src="wordmark-xl.png" alt="Wonderlust">
+  </div>
+</section>
+<div class="stripe"></div>
+
+<script>
+document.documentElement.classList.add('js');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const loops=[...document.querySelectorAll('video.loop')];
+loops.forEach(v=>{v.muted=true});
+const start=v=>{if(!v.getAttribute('src')){v.src=v.dataset.src}v.play().catch(()=>{})};
+const stop=v=>{v.pause();if(v.getAttribute('src')){v.removeAttribute('src');v.load()}};
+if(!reduce){
+  if('IntersectionObserver' in window){
+    const vo=new IntersectionObserver(es=>es.forEach(en=>{en.isIntersecting?start(en.target):stop(en.target)}),{threshold:.2,rootMargin:'120px 0px'});
+    loops.forEach(v=>vo.observe(v));
+  }else loops.forEach(start);
+}
+if('IntersectionObserver' in window && !reduce){
+  const vh=innerHeight;
+  const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.remove('pre');io.unobserve(en.target)}}),{rootMargin:'0px 0px -8% 0px'});
+  [...document.querySelectorAll('.rv')].forEach((el,i)=>{if(el.getBoundingClientRect().top>vh){el.classList.add('pre');el.style.transitionDelay=(i%3)*80+'ms';io.observe(el)}});
+}
+document.getElementById('copy').addEventListener('click',()=>{
+  const t=document.getElementById('mail').textContent,o=document.getElementById('copied');
+  const ok=()=>{o.textContent='Correo copiado';setTimeout(()=>o.textContent='wonderlust.live',2200)};
+  const fb=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById('mail'));const s=getSelection();s.removeAllRanges();s.addRange(r)};
+  try{navigator.clipboard.writeText(t).then(ok,fb)}catch(e){fb()}
+});
+</script>
+</html>
