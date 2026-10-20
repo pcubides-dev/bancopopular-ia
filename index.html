@@ -250,6 +250,8 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
 .flow p{font-size:15px}
 @media (hover:hover){.flow article:hover{transform:translateY(-6px);background:#fff;box-shadow:0 36px 64px -34px rgba(60,48,110,.5)}.msg:hover{transform:translateX(6px)}}
 @media (max-width:860px){.act-grid,.flow{grid-template-columns:1fr}.flow article.wide{grid-column:auto}.chat{position:static}}
+.host-panel{max-width:860px;padding:clamp(28px,4vw,48px)}
+.host-panel p{margin-top:18px;font-size:clamp(16px,1.4vw,18px)}
 /* interacción al pasar el mouse */
 .sp,.theme,figure .bezel,.journey > div,.rows > div,.run > div,.tbl{transition:transform .6s var(--ease),box-shadow .6s var(--ease),border-color .6s var(--ease),background .6s var(--ease)}
 .ph,figure .bezel{overflow:hidden}
@@ -306,7 +308,7 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
 
 <div class="stripe"></div>
 <nav class="nav" aria-label="Secciones">
-  <a href="#idea">Idea</a><a href="#conferencista">Conferencistas</a><a href="#contenidos">Contenidos</a><a href="#escenario">Escenario</a><a href="#formato">Formato</a><a href="#actividad">Actividad IA</a><a href="#tecnica">Técnica</a><a href="#presupuesto">Presupuesto</a>
+  <a href="#idea">Idea</a><a href="#conferencista">Conferencistas</a><a href="#contenidos">Contenidos</a><a href="#escenario">Escenario</a><a href="#formato">Formato</a><a href="#actividad">Actividad IA</a><a href="#tecnica">Técnica</a><a href="#host">Host</a>
 </nav>
 
 <header class="wrap hero">
@@ -355,7 +357,7 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
       <p class="fit">Puede explorar cómo la IA está cambiando las reglas de juego, qué capacidades necesitan las organizaciones y cómo la banca puede anticiparse a este nuevo entorno.</p>
     </div></article>
   </div>
-  <p class="note rv">El host del evento conduce la conversación con el conferencista. Proponemos un moderador de nuestro equipo, y si Banco Popular prefiere que sea un vocero propio, funciona igual de bien. Honorarios y disponibilidad se confirman con cada conferencista.</p>
+  <p class="note rv">El host del evento conduce la conversación con el conferencista. Proponemos un moderador de nuestro equipo, y si Banco Popular prefiere que sea un vocero propio, funciona igual de bien. La disponibilidad se confirma con cada conferencista.</p>
 </section>
 
 <section class="wrap" id="contenidos">
@@ -494,60 +496,10 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
   </div>
 </section>
 
-<section class="wrap" id="presupuesto">
-  <h2 class="rv">Presupuesto</h2>
-  <div class="budget">
-    <div>
-      <div class="tbl rv"><div>
-        <h3>Evento virtual</h3>
-        <p class="sub">Conferencia y conversación en estudio, transmisión para 300 participantes. Valores en pesos colombianos.</p>
-        <table>
-          <thead><tr><th>Concepto</th><th class="n">Valor</th></tr></thead>
-          <tbody>
-            <tr class="cat"><td colspan="2">Conferencista</td></tr>
-            <tr><td>Honorarios del experto<small>Según el perfil elegido. Se confirma con disponibilidad.</small></td><td class="n">Por confirmar</td></tr>
-            <tr><td>Búsqueda, propuesta y gestión del conferencista</td><td class="n">Incluido</td></tr>
-            <tr><td>Viáticos del conferencista<small>Los tres conferencistas tienen base en Bogotá.</small></td><td class="n">No aplica</td></tr>
-            <tr class="cat"><td colspan="2">Contenidos y formato</td></tr>
-            <tr><td>Estructura de contenidos y escaleta</td><td class="n">$923.077</td></tr>
-            <tr><td>Formato, dinámica y coordinación de contenidos</td><td class="n">$1.307.692</td></tr>
-            <tr><td>Ensayo técnico previo</td><td class="n">$2.000.000</td></tr>
-            <tr class="cat"><td colspan="2">Escenario virtual</td></tr>
-            <tr><td>Diseño del escenario virtual 3D</td><td class="n">$2.151.178</td></tr>
-            <tr><td>Escenario de realidad extendida, software y hardware</td><td class="n">$2.490.769</td></tr>
-            <tr><td>Operador de escenario 3D<small>Ensayo y transmisión, 2 turnos.</small></td><td class="n">$2.461.538</td></tr>
-            <tr class="cat"><td colspan="2">Estudio y equipos</td></tr>
-            <tr><td>Kit de ejecución técnica en estudio croma</td><td class="n">$1.335.165</td></tr>
-            <tr><td>Teleprompter y monitores de retorno</td><td class="n">$698.526</td></tr>
-            <tr><td>Consola de audio</td><td class="n">$307.692</td></tr>
-            <tr><td>Micrófonos de diadema con in-ear<small>2 unidades.</small></td><td class="n">$373.846</td></tr>
-            <tr class="cat"><td colspan="2">Plataforma y transmisión</td></tr>
-            <tr><td>Licencia de streaming HD</td><td class="n">$2.686.154</td></tr>
-            <tr><td>Plataforma Zoom para 300 participantes<small>Registro, sala y chat del evento.</small></td><td class="n">$1.042.857</td></tr>
-            <tr><td>Master de transmisión en estudio</td><td class="n">$1.892.308</td></tr>
-            <tr class="cat"><td colspan="2">Personal técnico</td></tr>
-            <tr><td>Integrador de transmisión<small>2 turnos.</small></td><td class="n">$1.538.462</td></tr>
-            <tr><td>Técnico de audio<small>2 turnos.</small></td><td class="n">$769.230</td></tr>
-            <tr><td>Runner<small>2 turnos.</small></td><td class="n">$692.308</td></tr>
-            <tr class="cat"><td colspan="2">Gráficos</td></tr>
-            <tr><td>Paquete gráfico de transmisión</td><td class="n">$1.230.769</td></tr>
-            <tr class="cat"><td colspan="2">Desarrollo IA</td></tr>
-            <tr><td>Actividad con IA sobre el chat del evento<small>Dinámica de participación, exportación y procesamiento del chat de Zoom y dashboard en tiempo real en el set.</small></td><td class="n">$2.100.000</td></tr>
-            <tr class="tot"><td>Total antes de IVA</td><td class="n">$26.001.571</td></tr>
-            <tr><td>IVA 19%</td><td class="n">$4.940.298</td></tr>
-            <tr class="grand"><td>Total con IVA</td><td class="n">$30.941.869</td></tr>
-          </tbody>
-        </table>
-      </div></div>
-
-
-    </div>
-
-    <div class="aside-stack">
-      <div class="kpi rv"><span>Evento virtual · total con IVA</span><b>$30.941.869</b><p>Sin honorarios del conferencista, que dependen del perfil elegido.</p></div>
-      <div class="glass mini rv"><h3>Host del evento</h3><p>Proponemos un moderador profesional de nuestro equipo para conducir la jornada y el bloque de conversación. Si Banco Popular propone su propio host, perfecto: este valor no se cobra.</p><b class="v">$2.346.154</b><p class="small" style="margin-top:6px">Antes de IVA · no está sumado en el total</p></div>
-      <p class="note">Valores sujetos a confirmación de fecha y a negociación final con proveedores.</p>
-    </div>
+<section class="wrap" id="host">
+  <div class="glass host-panel rv">
+    <h2>El host del evento</h2>
+    <p>Proponemos un moderador profesional de nuestro equipo para conducir la jornada y el bloque de conversación con el conferencista. Si Banco Popular prefiere que el host sea un vocero propio, funciona igual de bien: preparamos con él el guion y lo acompañamos en el ensayo técnico.</p>
   </div>
 </section>
 
