@@ -95,7 +95,11 @@ section{padding-block:clamp(88px,11vw,144px)}
 .sp:not(.main) > div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:22px;align-content:start}
 .sp:not(.main) .ph{align-self:start}
 .sp:not(.main) .info{display:flex;flex-direction:column;gap:12px;min-width:0}
-.speakers.trio .sp{grid-column:span 2}
+.speakers.trio{grid-template-columns:repeat(4,minmax(0,1fr))}
+.speakers.trio .sp{grid-column:auto}
+@media (max-width:1180px){.speakers.trio{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){.speakers.trio{grid-template-columns:1fr}}
+.ph.mono{aspect-ratio:4/5;display:grid;place-items:center;background:radial-gradient(90% 90% at 30% 20%,rgba(246,182,14,.28),transparent 60%),linear-gradient(160deg,#0B3642,#105163);color:#fff;font-family:var(--display,inherit);font-size:clamp(56px,6vw,84px);letter-spacing:.02em}
 .speakers.trio .sp > div{display:flex;flex-direction:column;gap:12px}
 .speakers.trio .ph{margin-bottom:6px;align-self:stretch}
 .speakers.trio .sp p.fit{font-size:14.5px}
@@ -333,7 +337,7 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
 </section>
 
 <section class="wrap" id="conferencista">
-  <div class="rv" style="max-width:760px"><h2>Conferencistas</h2><p style="margin-top:18px">Tres perfiles con base en Bogotá que conectan la inteligencia artificial con la banca, la transformación de las empresas y la nueva economía. Pueden repartirse los tres bloques o elegirse uno para toda la jornada, según disponibilidad.</p></div>
+  <div class="rv" style="max-width:760px"><h2>Conferencistas</h2><p style="margin-top:18px">Cuatro perfiles con base en Colombia que conectan la inteligencia artificial con la banca, la transformación de las empresas, la nueva economía y sus riesgos. Pueden repartirse los tres bloques o elegirse uno para toda la jornada, según disponibilidad.</p></div>
   <div class="speakers trio">
     <article class="sp rv"><div>
       <div class="ph"><img src="sp-covelli.jpg" alt="Santiago Covelli"></div>
@@ -355,6 +359,13 @@ tr.grand td{font-family:var(--display);font-weight:400;font-size:26px;text-trans
       <p class="role">IA, tecnología y la nueva economía</p>
       <p>Cofundador de TECHcetera, evangelista tecnológico y consultor en transformación digital. Trabajó en multinacionales de tecnología y de banca, y es invitado permanente en radio y televisión para hablar de tecnología.</p>
       <p class="fit">Puede explorar cómo la IA está cambiando las reglas de juego, qué capacidades necesitan las organizaciones y cómo la banca puede anticiparse a este nuevo entorno.</p>
+    </div></article>
+    <article class="sp rv"><div>
+      <div class="ph mono" role="img" aria-label="Javier Montoya">JM</div>
+      <h3>Javier Montoya</h3>
+      <p class="role">Riesgos de la inteligencia artificial</p>
+      <p>Experto en tecnología e ingeniero de sistemas de la Universidad Francisco de Paula Santander. Su conferencia aborda los riesgos de la inteligencia artificial: lo que conviene saber antes de adoptarla y cómo usarla con criterio.</p>
+      <p class="fit">Puede llevar el bloque del debate y el ritmo de la IA, con una mirada clara sobre seguridad, uso responsable y los cuidados que exige su adopción en la banca.</p>
     </div></article>
   </div>
   <p class="note rv">El host del evento conduce la conversación con el conferencista. Proponemos un moderador de nuestro equipo, y si Banco Popular prefiere que sea un vocero propio, funciona igual de bien. La disponibilidad se confirma con cada conferencista.</p>
