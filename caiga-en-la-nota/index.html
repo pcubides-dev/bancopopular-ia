@@ -78,6 +78,18 @@ kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-b
 .btn.hot kbd,.btn.primary kbd{background:rgba(0,0,0,.12);border-color:rgba(0,0,0,.25);color:inherit}
 .stage .btn:not(.primary):not(.hot){background:rgba(0,0,0,.22);border-color:rgba(255,255,255,.25)}
 .btn.small{padding:6px 11px;font-size:14px;border-radius:9px}
+.draw-overlay{position:absolute;inset:0;border-radius:22px;background:radial-gradient(ellipse 80% 70% at 50% 0%,#e3101c,var(--stage) 55%,#8f0009);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;overflow:auto}
+.draw-name{font-size:clamp(18px,2.4vw,24px);font-weight:800;color:#ffd9dc;min-height:1.4em}
+.draw-song{font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(28px,5vw,56px);line-height:1.05;text-wrap:balance}
+.draw-song.landed{color:var(--gold);animation:pop .45s ease-out}
+.draw-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;width:100%;max-width:640px}
+.draw-list li{background:rgba(0,0,0,.25);border-radius:12px;padding:8px 12px;text-align:left;display:flex;flex-direction:column}
+.draw-list li b{font-size:15px}
+.draw-list li span{color:var(--gold);font-weight:800}
+.pool{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.pool label{display:flex;align-items:center;gap:10px;background:var(--panel-2);border-radius:10px;padding:9px 12px;cursor:pointer;font-weight:700}
+.pool input{accent-color:var(--gold);width:18px;height:18px}
+.board .song{display:block;color:var(--muted);font-size:13px;font-weight:600;overflow-wrap:anywhere}
 .yt-wrap{margin-top:16px;aspect-ratio:16/9;max-width:100%;width:340px;border-radius:12px;overflow:hidden;background:#000}
 .yt-wrap iframe,.yt-wrap>div{width:100%;height:100%;display:block;border:0}
 
@@ -177,6 +189,13 @@ details summary{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px
         <div class="mic-live" id="micLive"></div>
         <button class="btn primary" id="btnUnmute">Volver la música <kbd>Espacio</kbd></button>
       </div>
+      <div class="draw-overlay" id="drawOverlay" hidden>
+        <div class="mute-tag">Sorteo de canciones · Fonseca</div>
+        <div class="draw-name" id="drawName">Cada participante canta la canción que le toque</div>
+        <div class="draw-song" id="drawSong">¿Qué canción te tocará?</div>
+        <ol class="draw-list" id="drawList"></ol>
+        <div class="row" style="justify-content:center"><button class="btn primary" id="btnDraw">Sortear</button><button class="btn hot" id="btnStart" hidden>Empezar el juego</button></div>
+      </div>
     </section>
 
     <section class="judge" id="judge" hidden aria-label="Puntuación de la ronda">
@@ -203,8 +222,15 @@ details summary{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px
       <div class="row"><button class="btn small" id="btnResetScores">Reiniciar puntajes</button></div>
     </section>
 
+    <section class="card" aria-labelledby="hPool">
+      <h2 id="hPool">Canciones</h2>
+      <p class="note">Fonseca. Marca las que entran al sorteo.</p>
+      <ul class="pool" id="pool"></ul>
+      <button class="btn primary" id="btnOpenDraw">Sortear canciones</button>
+    </section>
+
     <section class="card" aria-labelledby="hSong">
-      <h2 id="hSong">Canción</h2>
+      <h2 id="hSong">Otra canción</h2>
       <div class="tabs" role="tablist" id="srcTabs">
         <button role="tab" data-src="youtube" aria-selected="false">YouTube</button>
         <button role="tab" data-src="apple" aria-selected="false">Apple Music</button>
@@ -306,12 +332,26 @@ const DEMO_LRC = `[ti:Cielito lindo]
 [01:36.00]bien merecido
 [01:40.80]`;
 
+/* Canciones precargadas. Cada una trae varios videos (si YouTube no deja insertar uno, se prueba el siguiente)
+   y el id de su letra sincronizada en LRCLIB, elegida con la misma duración que el primer video. */
+const FONSECA = [
+  { id: "flores",     title: "Te mando flores",     lrc: 17364590, yt: ["Dx91TSLxa9w", "qTLd6u0ZW6c", "TbxlTDKNb_I", "9oLBY9QqTAQ"] },
+  { id: "arroyito",   title: "Arroyito",            lrc: 17805272, yt: ["lj7IQDeBNlI", "i2WPd05wYx8", "2bPiaBjljAA"] },
+  { id: "corazones",  title: "Simples corazones",   lrc: 6433193,  yt: ["q3XQ603d2UA", "9cgu67HWmKo", "-w7O9z32YQY", "oBwIdYX85BI"] },
+  { id: "sueno",      title: "Eres mi sueño",       lrc: 11319720, yt: ["00QVU7voMq8", "BHLUqJNHQeY", "vYLl-iOtXEo"] },
+  { id: "curiosidad", title: "Por pura curiosidad", lrc: 6432916,  yt: ["lvH91srClp0", "TmRdzepu6Jo", "99-Sf0hazBo"] },
+  { id: "buscarte",   title: "Vine a buscarte",     lrc: 12376157, yt: ["ERr4TmA1uCU", "7dpVyIyDwEo", "h-8-d5woRCM"] },
+  { id: "lejos",      title: "Estar lejos",         lrc: 25240297, yt: ["PLTGxBrTej4", "4WG4SvyVss0"] },
+];
+const songById = id => FONSECA.find(x => x.id === id);
+
 /* ---------- Estado ---------- */
 const S = {
   lines: [], player: null, source: "demo", title: "",
   offset: 0, muted: false, muteWall: 0, muteIdx: -1, autoTarget: -1,
   judging: false, nextAutoAt: 2, lastIdx: -2,
   teams: [], rounds: [], current: null, perTurn: 3, turnDone: false,
+  pool: FONSECA.map(x => x.id), assign: {}, preset: null, lrcDur: 0,
   mode: "auto", len: 2, showLyrics: true, mic: false, lang: "es-ES",
 };
 
@@ -320,7 +360,8 @@ function load() {
     const d = JSON.parse(localStorage.getItem("caiga.v1") || "null");
     if (d) {
       S.teams = d.teams || []; S.rounds = d.rounds || [];
-      Object.assign(S, pick(d.settings || {}, ["mode","len","showLyrics","mic","lang","offset","perTurn","current"]));
+      Object.assign(S, pick(d.settings || {}, ["mode","len","showLyrics","mic","lang","offset","perTurn","current","pool","assign"]));
+      S.pool = S.pool.filter(songById);
       S.rounds = S.rounds.filter(r => r.playerId);
     }
   } catch (e) {}
@@ -329,7 +370,7 @@ function load() {
 }
 function save() {
   try { localStorage.setItem("caiga.v1", JSON.stringify({ teams: S.teams, rounds: S.rounds,
-    settings: pick(S, ["mode","len","showLyrics","mic","lang","offset","perTurn","current"]) })); } catch (e) {}
+    settings: pick(S, ["mode","len","showLyrics","mic","lang","offset","perTurn","current","pool","assign"]) })); } catch (e) {}
 }
 function pick(o, keys) { const r = {}; keys.forEach(k => { if (k in o) r[k] = o[k]; }); return r; }
 function mkTeam(name) {
@@ -450,7 +491,8 @@ class FilePlayer {
 }
 
 class YouTubePlayer {
-  constructor(id) { this.id = id; this.p = null; }
+  constructor(ids) { this.ids = [].concat(ids); this.i = 0; this.p = null; this.want = false; this.checked = null; }
+  get id() { return this.ids[this.i]; }
   static api() {
     if (window.YT && YT.Player) return Promise.resolve();
     return new Promise((res, rej) => {
@@ -462,19 +504,28 @@ class YouTubePlayer {
   async load() {
     await YouTubePlayer.api();
     $("#ytWrap").hidden = false; $("#ytWrap").innerHTML = '<div id="ytPlayer"></div>';
-    await new Promise((res, rej) => {
+    await new Promise(res => {
       this.p = new YT.Player("ytPlayer", { videoId: this.id, playerVars: { playsinline: 1, rel: 0, controls: 1 },
         events: {
           onReady: res,
-          onStateChange: e => { if (e.data === YT.PlayerState.ENDED) onEnded(); },
-          onError: e => { const m = { 2: "enlace no válido", 5: "error del reproductor", 100: "video no encontrado", 101: "el dueño no permite insertarlo", 150: "el dueño no permite insertarlo" }[e.data] || "error " + e.data;
-            toast("YouTube: " + m + ". Prueba otra versión de la canción.", 5000); rej(new Error(m)); },
+          onStateChange: e => {
+            if (e.data === YT.PlayerState.ENDED) onEnded();
+            if (e.data === YT.PlayerState.PLAYING && this.checked !== this.id) { this.checked = this.id; onVideoPlaying(this); }
+          },
+          onError: e => this._fail(e.data),
         } });
     });
     const d = this.p.getVideoData ? this.p.getVideoData() : {};
     return { title: d.title || "Video de YouTube", query: cleanTitle(d.title || "", d.author || "") };
   }
-  play() { this.p.playVideo(); } pause() { this.p.pauseVideo(); } seek(t) { this.p.seekTo(t, true); }
+  _fail(code) {
+    const m = { 2: "enlace no válido", 5: "error del reproductor", 100: "video no encontrado", 101: "el dueño no permite insertarlo", 150: "el dueño no permite insertarlo" }[code] || "error " + code;
+    if (this.i < this.ids.length - 1) {
+      this.i++; toast(`YouTube: ${m}. Probando otra versión…`);
+      if (this.want) this.p.loadVideoById(this.id); else this.p.cueVideoById(this.id);
+    } else toast(`YouTube: ${m}. No quedan más versiones de esta canción.`, 6000);
+  }
+  play() { this.want = true; this.p.playVideo(); } pause() { this.want = false; this.p.pauseVideo(); } seek(t) { this.p.seekTo(t, true); }
   getTime() { return this.p && this.p.getCurrentTime ? this.p.getCurrentTime() : 0; }
   isPlaying() { return !!this.p && this.p.getPlayerState && this.p.getPlayerState() === 1; }
   duration() { return this.p && this.p.getDuration ? this.p.getDuration() : 0; }
@@ -532,10 +583,10 @@ async function useSource(kind, player, quiet) {
   $("#srcStatus").textContent = "Cargando…";
   try {
     const info = await player.load();
-    S.player = player; S.title = info.title;
-    $("#songTitle").textContent = info.title;
+    S.player = player; S.title = player.label || info.title;
+    $("#songTitle").textContent = S.title;
     $("#srcStatus").textContent = "Fuente: " + { demo: "demo", file: "archivo local", youtube: "YouTube", apple: "Apple Music" }[kind] + " · lista";
-    if (info.query) { $("#lrcQuery").value = info.query; searchLyrics(info.query); }
+    if (info.query && !player.noSearch) { $("#lrcQuery").value = info.query; searchLyrics(info.query); }
     if (!quiet) toast("Canción lista. Busca su letra y pulsa Reproducir.");
   } catch (e) {
     const msg = String(e && e.message || e);
@@ -547,6 +598,93 @@ async function useSource(kind, player, quiet) {
   }
   render(true);
 }
+
+/* ---------- Canciones precargadas ---------- */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function lrclib(path) {
+  for (let a = 0; a < 4; a++) {
+    try {
+      const r = await fetch("https://lrclib.net/api/" + path);
+      if (r.status === 404) return null;
+      if (r.ok) { const j = await r.json(); if (j.syncedLyrics) return j; }
+    } catch (e) {}
+    await sleep(1200 * (a + 1));
+  }
+  return null;
+}
+async function fetchLyrics(id) {
+  try { const c = JSON.parse(localStorage.getItem("caiga.lrc." + id) || "null"); if (c) return c; } catch (e) {}
+  const j = await lrclib("get/" + id);
+  if (j) { const c = { syncedLyrics: j.syncedLyrics, duration: j.duration }; try { localStorage.setItem("caiga.lrc." + id, JSON.stringify(c)); } catch (e) {} return c; }
+  return null;
+}
+async function loadPreset(song) {
+  S.preset = song;
+  $("#lrcStatus").textContent = "Cargando letra…"; S.lines = []; render(true);
+  const yt = new YouTubePlayer(song.yt); yt.noSearch = true; yt.label = "Fonseca · " + song.title;
+  const [lrc] = await Promise.all([fetchLyrics(song.lrc), useSource("youtube", yt, true)]);
+  if (S.preset !== song) return;
+  if (lrc) { S.lrcDur = lrc.duration; setLyrics(parseLRC(lrc.syncedLyrics), "Fonseca · " + song.title); }
+  else $("#lrcStatus").textContent = "No se pudo traer la letra de LRCLIB. Revisa la conexión y vuelve a pulsar Jugar.";
+}
+// Si el video que sí cargó dura distinto que la letra, se busca en LRCLIB una letra con la duración de ese video.
+async function onVideoPlaying(yt) {
+  const song = S.preset; if (!song || S.player !== yt) return;
+  const d = Math.round(yt.duration()); if (!d || Math.abs(d - S.lrcDur) <= 2.5) return;
+  const j = await lrclib(`get?artist_name=Fonseca&track_name=${encodeURIComponent(song.title)}&duration=${d}`);
+  if (j && S.preset === song && S.player === yt) { S.lrcDur = j.duration; setLyrics(parseLRC(j.syncedLyrics), "Fonseca · " + song.title); toast("Letra ajustada a esta versión del video."); }
+}
+
+function renderPool() {
+  const ul = $("#pool"); ul.innerHTML = "";
+  FONSECA.forEach(song => {
+    const li = document.createElement("li");
+    li.innerHTML = `<label><input type="checkbox" id="pool-${song.id}"><span></span></label>`;
+    li.querySelector("span").textContent = song.title;
+    const cb = li.querySelector("input"); cb.checked = S.pool.includes(song.id);
+    cb.onchange = () => { S.pool = FONSECA.map(x => x.id).filter(id => id === song.id ? cb.checked : S.pool.includes(id)); save(); };
+    ul.appendChild(li);
+  });
+}
+function openDraw() {
+  if (S.muted) doUnmute(true);
+  if (S.player && S.player.isPlaying()) S.player.pause();
+  $("#drawOverlay").hidden = false; $("#btnStart").hidden = !Object.keys(S.assign).length;
+  renderDrawList();
+}
+function renderDrawList() {
+  const ol = $("#drawList"); ol.innerHTML = "";
+  S.teams.forEach(t => {
+    const song = songById(S.assign[t.id]); if (!song) return;
+    const li = document.createElement("li"); li.innerHTML = "<b></b><span></span>";
+    li.firstChild.textContent = t.name; li.lastChild.textContent = song.title; ol.appendChild(li);
+  });
+}
+let drawing = false;
+async function runDraw() {
+  if (drawing) return;
+  const pool = FONSECA.filter(x => S.pool.includes(x.id));
+  if (!S.teams.length) { toast("Agrega participantes antes de sortear."); return; }
+  if (!pool.length) { toast("Marca al menos una canción para el sorteo."); return; }
+  drawing = true; $("#btnDraw").disabled = true; $("#btnStart").hidden = true;
+  S.assign = {}; renderDrawList(); renderBoard();
+  const fast = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let bag = [];
+  for (const t of S.teams) {
+    if (!bag.length) bag = pool.slice().sort(() => Math.random() - 0.5);
+    const song = bag.pop(), el = $("#drawSong");
+    $("#drawName").textContent = "Le toca a " + t.name;
+    el.classList.remove("landed");
+    for (let k = 0; k < (fast ? 1 : 16); k++) { el.textContent = pool[(k + rand(0, pool.length)) % pool.length].title; await sleep(50 + k * k * 1.6); }
+    el.textContent = song.title; void el.offsetWidth; el.classList.add("landed");
+    S.assign[t.id] = song.id; renderDrawList(); renderBoard();
+    await sleep(fast ? 300 : 1100);
+  }
+  save(); drawing = false;
+  $("#drawName").textContent = "¡Listo el sorteo!"; $("#drawSong").textContent = "A cantar";
+  $("#btnDraw").disabled = false; $("#btnDraw").firstChild.textContent = "Volver a sortear"; $("#btnStart").hidden = false;
+}
+function startGame() { $("#drawOverlay").hidden = true; if (S.teams.length) setPlayer(S.teams[0].id); }
 
 /* ---------- Búsqueda de letras ---------- */
 async function searchLyrics(q) {
@@ -646,9 +784,11 @@ function setPlayer(id) {
   S.current = id; S.turnDone = false; S.judging = false; $("#judge").hidden = true;
   $("#btnNext").firstChild.textContent = "Siguiente ronda ";
   S.pendingTurnStart = true;
-  if (S.player) { S.player.pause(); S.player.seek(0); }
+  const song = songById(S.assign[id]);
+  if (song) loadPreset(song);
+  else if (S.player) { S.player.pause(); S.player.seek(0); }
   S.nextAutoAt = 2; S.lastIdx = -2; save(); renderBoard(); render(true);
-  toast(`Turno de ${playerName(id)}. Pulsa Reproducir cuando esté listo.`);
+  toast(`Turno de ${playerName(id)}${song ? ": «" + song.title + "»" : ""}. Pulsa Reproducir cuando esté listo.`);
 }
 function nextPlayer() { setPlayer(upcoming()); }
 function award(pts) {
@@ -758,6 +898,8 @@ function renderBoard() {
     if (t.id === S.current) li.className = "now";
     li.innerHTML = `<span class="rank">${i + 1}</span><span class="who"><b><span class="dot" style="--c:${t.color}"></span><span></span></b><div class="bar" style="--c:${t.color};width:${(100 * score[t.id] / max).toFixed(1)}%"></div></span><span class="pts">${score[t.id]}</span><button class="play">${t.id === S.current ? "Jugando" : "Jugar"}</button><button class="x" aria-label="Quitar participante">×</button>`;
     li.querySelector("b span:last-child").textContent = t.name;
+    const sg = songById(S.assign[t.id]);
+    if (sg) { const sm = document.createElement("small"); sm.className = "song"; sm.textContent = sg.title; li.querySelector(".who b").after(sm); }
     li.querySelector(".play").onclick = () => { if (t.id !== S.current) setPlayer(t.id); };
     li.querySelector(".x").onclick = () => {
       S.teams = S.teams.filter(x => x.id !== t.id);
@@ -819,6 +961,9 @@ $("#btnMute").onclick = toggleMute;
 $("#btnUnmute").onclick = () => doUnmute();
 $("#btnRestart").onclick = () => { if (!S.player) return; if (S.muted) doUnmute(true); closeJudge(); S.player.seek(0); S.nextAutoAt = 2; S.lastIdx = -2; };
 $("#btnNext").onclick = closeJudge;
+$("#btnOpenDraw").onclick = openDraw;
+$("#btnDraw").onclick = runDraw;
+$("#btnStart").onclick = startGame;
 $("#btnSync").onclick = () => {
   if (!S.player || !S.lines.length) return;
   const raw = S.player.getTime(); let best = null;
@@ -843,7 +988,10 @@ document.addEventListener("keydown", e => {
 
 $("#teamForm").onsubmit = e => {
   e.preventDefault(); const n = $("#teamName").value.trim(); if (!n) return;
-  const t = mkTeam(n); S.teams.push(t); if (!S.current) S.current = t.id; $("#teamName").value = ""; save(); renderBoard();
+  const t = mkTeam(n); S.teams.push(t); if (!S.current) S.current = t.id; $("#teamName").value = "";
+  const pool = S.pool.filter(songById);
+  if (Object.keys(S.assign).length && pool.length) { S.assign[t.id] = pool[rand(0, pool.length - 1)]; toast(`A ${n} le tocó «${songById(S.assign[t.id]).title}».`); }
+  save(); renderBoard(); if (!$("#drawOverlay").hidden) renderDrawList();
 };
 $("#btnResetScores").onclick = () => {
   const b = $("#btnResetScores");
@@ -897,9 +1045,14 @@ $("#selLang").onchange = e => { S.lang = e.target.value; save(); };
 load();
 $("#chkShow").checked = S.showLyrics; $("#chkMic").checked = S.mic; $("#selLang").value = S.lang;
 bindSeg("#segMode", "mode", String); bindSeg("#segLen", "len", Number); bindSeg("#segTurn", "perTurn", Number); setOffset(S.offset);
-renderBoard(); renderHistory();
-setLyrics(parseLRC(DEMO_LRC), "Cielito lindo (demo)");
-useSource("demo", new DemoPlayer(), true);
+renderBoard(); renderHistory(); renderPool();
+const startSong = songById(S.assign[S.current]);
+if (startSong) loadPreset(startSong);
+else {
+  setLyrics(parseLRC(DEMO_LRC), "Cielito lindo (demo)");
+  useSource("demo", new DemoPlayer(), true);
+  openDraw();
+}
 requestAnimationFrame(tick);
 </script>
 </body>
