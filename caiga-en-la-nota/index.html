@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Caiga en la Nota</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=JetBrains+Mono:wght@500&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,800;6..12,900&display=swap">
+<style>
+/* Layout: escenario con marco de bombillas a la izquierda, mesa del presentador (marcador + ajustes) a la derecha; en celular se apilan. */
+:root{
+  --bg:#150e29; --panel:#211843; --panel-2:#2b2052; --line:#3c2e6c;
+  --fg:#f7f0e3; --muted:#a99dcb; --gold:#ffc94a; --coral:#ff5d73; --mint:#4fe0b0; --sky:#6cc4ff;
+  --display:"Bungee",Impact,"Arial Black",sans-serif;
+  --body:"Nunito Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{margin:0;color:var(--fg);font:16px/1.5 var(--body);
+  background:radial-gradient(ellipse 70% 45% at 35% -5%,rgba(255,201,74,.16),transparent 70%),var(--bg);background-attachment:fixed}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:22px;max-width:1300px;margin:0 auto;
+  padding-block:18px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (max-width:940px){.app{grid-template-columns:minmax(0,1fr)}}
+header.top{grid-column:1/-1;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-size:clamp(26px,4vw,40px);line-height:1;margin:0;letter-spacing:.01em}
+.logo span{color:var(--gold)}
+.tag{color:var(--muted);margin:4px 0 0;font-size:14px}
+.kbd-help{color:var(--muted);font-size:13px;display:flex;gap:12px;flex-wrap:wrap}
+kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--panel)}
+
+/* Escenario */
+.stage-col{display:flex;flex-direction:column;gap:18px;min-width:0}
+.stage{position:relative;border-radius:22px;background:linear-gradient(180deg,var(--panel-2),var(--panel));padding:22px;min-height:380px;display:flex;flex-direction:column;isolation:isolate}
+.stage::before{content:"";position:absolute;inset:-9px;border-radius:30px;padding:9px;z-index:-1;
+  background:radial-gradient(circle,var(--bulb,var(--gold)) 0 2.6px,transparent 3.6px) 0 0/17px 17px;
+  -webkit-mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+.stage.is-muted{--bulb:var(--coral)}
+.stage.is-muted::before{animation:blink .5s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.stage.is-muted::before{animation:none}}
+.stage-top{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:14px;flex-wrap:wrap}
+.song-title{font-weight:800;color:var(--fg);min-width:0;overflow-wrap:anywhere}
+.lyrics{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;text-align:center;padding:26px 4px;min-height:230px}
+.l{margin:0;text-wrap:balance;overflow-wrap:anywhere;transition:color .2s}
+.l.prev,.l.next{color:var(--muted);font-size:clamp(16px,2.1vw,22px);font-weight:600;min-height:1.5em}
+.l.prev{opacity:.6}
+.l.cur{font-size:clamp(28px,4.6vw,54px);font-weight:900;line-height:1.12}
+.l.cur.revealed{color:var(--gold);animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(.85);opacity:.2}60%{transform:scale(1.05)}100%{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.l.cur.revealed{animation:none}}
+.mute-overlay{position:absolute;inset:0;border-radius:22px;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px}
+.mute-tag{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--coral);font-weight:800}
+.mute-big{font-family:var(--display);font-size:clamp(32px,6vw,68px);line-height:1;color:var(--fg)}
+.mute-timer{font-size:28px;color:var(--gold)}
+.mic-live{color:var(--muted);font-style:italic;max-width:60ch;min-height:1.5em}
+.progress{height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--coral))}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{border:0;border-radius:12px;padding:11px 18px;font-weight:800;cursor:pointer;background:var(--panel-2);border:1px solid var(--line);display:inline-flex;align-items:center;gap:8px}
+.btn:hover{border-color:var(--muted)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--gold);color:#241a06;border-color:var(--gold)}
+.btn.hot{background:var(--coral);color:#2a0710;border-color:var(--coral)}
+.btn.hot kbd,.btn.primary kbd{background:rgba(0,0,0,.12);border-color:rgba(0,0,0,.25);color:inherit}
+.btn.small{padding:6px 11px;font-size:14px;border-radius:9px}
+.yt-wrap{margin-top:16px;aspect-ratio:16/9;max-width:100%;width:340px;border-radius:12px;overflow:hidden;background:#000}
+.yt-wrap iframe,.yt-wrap>div{width:100%;height:100%;display:block;border:0}
+
+/* Panel de jueces */
+.judge{background:var(--panel);border:2px solid var(--gold);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.judge-line{font-size:22px;font-weight:900;color:var(--gold);margin:2px 0 0;overflow-wrap:anywhere}
+.judge-meta{color:var(--muted);font-size:14px}
+.mic-result{background:var(--panel-2);border-radius:12px;padding:12px 14px;font-size:14px}
+.mic-result strong{color:var(--fg)}
+.judge-rows{display:flex;flex-direction:column;gap:8px}
+.jrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.jrow .name{flex:1 1 140px;font-weight:800;display:flex;align-items:center;gap:8px;min-width:0}
+.jrow .opts{display:flex;gap:6px;flex-wrap:wrap}
+.opt{border:1px solid var(--line);background:var(--panel-2);border-radius:9px;padding:6px 10px;font-weight:700;font-size:14px;cursor:pointer}
+.opt[aria-pressed="true"].g{background:var(--mint);color:#06281d;border-color:var(--mint)}
+.opt[aria-pressed="true"].c{background:var(--gold);color:#241a06;border-color:var(--gold)}
+.opt[aria-pressed="true"].f{background:var(--coral);color:#2a0710;border-color:var(--coral)}
+.dot{width:12px;height:12px;border-radius:50%;flex:none;background:var(--c)}
+
+/* Mesa del presentador */
+.side{display:flex;flex-direction:column;gap:18px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card h2{font-family:var(--display);font-size:17px;font-weight:400;margin:0;letter-spacing:.02em}
+.card h3{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:4px 0 0}
+.board{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.board li{display:grid;grid-template-columns:22px minmax(0,1fr) auto auto;align-items:center;gap:10px}
+.board .rank{color:var(--muted);font-family:var(--mono);font-size:13px}
+.board .who{min-width:0}
+.board .who b{display:flex;align-items:center;gap:8px;overflow-wrap:anywhere}
+.board .bar{height:5px;border-radius:9px;background:var(--c);margin-top:4px;min-width:4px}
+.board .pts{font-family:var(--mono);font-size:20px;color:var(--gold)}
+.x{background:none;border:0;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;border-radius:6px}
+.x:hover{color:var(--coral)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>input[type=text],.row>input[type=url],.row>input[type=password],.row>input[type=search]{flex:1 1 160px;min-width:0}
+input[type=text],input[type=url],input[type=password],input[type=search],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+textarea{width:100%;min-height:110px;font-family:var(--mono);font-size:13px;resize:vertical}
+.tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:12px;flex-wrap:wrap}
+.tabs button{flex:1 1 auto;border:0;background:none;padding:7px 10px;border-radius:9px;font-weight:800;font-size:14px;cursor:pointer;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--panel-2);color:var(--fg)}
+.note{font-size:13px;color:var(--muted);margin:0}
+.note a{color:var(--sky)}
+.status{font-size:14px;padding:8px 12px;border-radius:10px;background:var(--panel-2)}
+.results{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
+.results button{width:100%;text-align:left;background:var(--panel-2);border:1px solid transparent;border-radius:10px;padding:8px 10px;cursor:pointer}
+.results button:hover{border-color:var(--gold)}
+.results small{color:var(--muted);display:block}
+.set{display:grid;gap:10px}
+.set label{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:15px}
+.set input[type=range]{width:100%;accent-color:var(--gold)}
+.seg{display:flex;gap:4px}
+.seg button{border:1px solid var(--line);background:none;border-radius:8px;padding:5px 10px;font-weight:700;font-size:14px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--gold);color:#241a06;border-color:var(--gold)}
+details summary{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px}
+.history{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:14px;max-height:240px;overflow:auto}
+.history li{border-left:3px solid var(--line);padding-left:10px}
+.history small{color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);font-weight:700;padding:10px 16px;border-radius:12px;max-width:calc(100% - 32px);box-shadow:0 8px 30px rgba(0,0,0,.4);z-index:20}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div>
+      <h1 class="logo">Caiga en la <span>Nota</span></h1>
+      <p class="tag">La música se silencia, la gente sigue cantando. Cuando vuelve, ¿van donde va la canción?</p>
+    </div>
+    <div class="kbd-help"><span><kbd>Espacio</kbd> silenciar/volver</span><span><kbd>P</kbd> reproducir/pausar</span><span><kbd>1</kbd>–<kbd>9</kbd> equipo en la nota</span><span><kbd>Enter</kbd> siguiente ronda</span></div>
+  </header>
+
+  <main class="stage-col">
+    <section class="stage" id="stage" aria-label="Escenario">
+      <div class="stage-top"><span class="song-title" id="songTitle">Sin canción</span><span class="mono" id="clock">0:00 / 0:00</span></div>
+      <div class="lyrics" aria-live="polite">
+        <p class="l prev" id="lPrev"></p>
+        <p class="l cur" id="lCur">♪</p>
+        <p class="l next" id="lNext"></p>
+      </div>
+      <div class="progress" aria-hidden="true"><div id="prog"></div></div>
+      <div class="controls">
+        <button class="btn primary" id="btnPlay">Reproducir <kbd>P</kbd></button>
+        <button class="btn hot" id="btnMute">Silenciar <kbd>Espacio</kbd></button>
+        <button class="btn" id="btnRestart">Reiniciar</button>
+        <button class="btn" id="btnSync" title="Púlsalo justo cuando empiece una línea de la letra">Ajustar letra aquí</button>
+      </div>
+      <div class="yt-wrap" id="ytWrap" hidden><div id="ytPlayer"></div></div>
+      <div class="mute-overlay" id="muteOverlay" hidden>
+        <div class="mute-tag">Música en silencio</div>
+        <div class="mute-big">¡Sigan cantando!</div>
+        <div class="mute-timer mono" id="muteTimer">0.0 s</div>
+        <div class="mic-live" id="micLive"></div>
+        <button class="btn primary" id="btnUnmute">Volver la música <kbd>Espacio</kbd></button>
+      </div>
+    </section>
+
+    <section class="judge" id="judge" hidden aria-label="Puntuación de la ronda">
+      <div>
+        <div class="eyebrow" id="judgeRound">Ronda 1 · la canción va en</div>
+        <p class="judge-line" id="judgeLine"></p>
+        <div class="judge-meta" id="judgeMeta"></div>
+      </div>
+      <div class="mic-result" id="micResult" hidden></div>
+      <div class="judge-rows" id="judgeRows"></div>
+      <div class="row"><button class="btn primary" id="btnNext">Siguiente ronda <kbd>Enter</kbd></button></div>
+    </section>
+  </main>
+
+  <aside class="side">
+    <section class="card" aria-labelledby="hBoard">
+      <h2 id="hBoard">Marcador</h2>
+      <ol class="board" id="board"></ol>
+      <form class="row" id="teamForm">
+        <input type="text" id="teamName" placeholder="Nombre del equipo" maxlength="24" aria-label="Nombre del equipo">
+        <button class="btn small" type="submit">Agregar</button>
+      </form>
+      <div class="row"><button class="btn small" id="btnResetScores">Reiniciar puntajes</button></div>
+    </section>
+
+    <section class="card" aria-labelledby="hSong">
+      <h2 id="hSong">Canción</h2>
+      <div class="tabs" role="tablist" id="srcTabs">
+        <button role="tab" data-src="youtube" aria-selected="false">YouTube</button>
+        <button role="tab" data-src="apple" aria-selected="false">Apple Music</button>
+        <button role="tab" data-src="file" aria-selected="false">Archivo</button>
+        <button role="tab" data-src="demo" aria-selected="true">Demo</button>
+      </div>
+      <div data-panel="youtube" hidden>
+        <form class="row" id="ytForm">
+          <input type="url" id="ytUrl" placeholder="Enlace de YouTube o YouTube Music" aria-label="Enlace de YouTube">
+          <button class="btn small" type="submit">Cargar</button>
+        </form>
+        <p class="note">Sirven enlaces de music.youtube.com y youtube.com. Usa el video de audio oficial (sin letra en pantalla). Si sale el error 150, el dueño no permite insertarlo: prueba otra versión.</p>
+      </div>
+      <div data-panel="apple" hidden>
+        <form class="set" id="amForm">
+          <input type="password" id="amToken" placeholder="Developer token de MusicKit" aria-label="Developer token de MusicKit" autocomplete="off">
+          <input type="text" id="amSong" placeholder="Enlace de la canción en music.apple.com o ID" aria-label="Canción de Apple Music">
+          <button class="btn small" type="submit">Conectar y cargar</button>
+        </form>
+        <p class="note">Requiere un token de Apple Developer (MusicKit) y que quien inicie sesión tenga suscripción a Apple Music.</p>
+      </div>
+      <div data-panel="file" hidden>
+        <input type="file" id="fileIn" accept="audio/*" aria-label="Archivo de audio">
+        <p class="note">Un MP3 o M4A de tu equipo. Funciona sin internet.</p>
+      </div>
+      <div data-panel="demo">
+        <button class="btn small" id="btnDemo">Cargar demo</button>
+        <p class="note">Ritmo sintetizado en vals con la letra de «Cielito lindo» (tradicional, dominio público). Sirve para probar el juego sin cuentas ni internet.</p>
+      </div>
+      <div class="status" id="srcStatus">Fuente: demo</div>
+
+      <h3>Letra sincronizada</h3>
+      <form class="row" id="lrcForm">
+        <input type="search" id="lrcQuery" placeholder="Canción y artista" aria-label="Buscar letra">
+        <button class="btn small" type="submit">Buscar</button>
+      </form>
+      <ul class="results" id="lrcResults"></ul>
+      <details>
+        <summary>Pegar letra en formato LRC</summary>
+        <textarea id="lrcPaste" placeholder="[00:12.30] Primera línea&#10;[00:16.80] Segunda línea" aria-label="Letra LRC"></textarea>
+        <button class="btn small" id="btnPaste">Usar esta letra</button>
+      </details>
+      <div class="status" id="lrcStatus">Sin letra</div>
+      <p class="note">Las letras vienen de <a href="https://lrclib.net" target="_blank" rel="noopener">LRCLIB</a>. Elige la versión cuya duración coincida con la canción.</p>
+    </section>
+
+    <section class="card" aria-labelledby="hSet">
+      <h2 id="hSet">Reglas</h2>
+      <div class="set">
+        <label>Silencios <span class="seg" id="segMode"><button data-v="auto" aria-pressed="true">Automáticos</button><button data-v="manual" aria-pressed="false">Manuales</button></span></label>
+        <label>Duración <span class="seg" id="segLen"><button data-v="1" aria-pressed="false">Corta</button><button data-v="2" aria-pressed="true">Media</button><button data-v="3" aria-pressed="false">Larga</button></span></label>
+        <label for="chkShow">Mostrar la letra mientras suena <input type="checkbox" id="chkShow" checked></label>
+        <label for="chkMic">Escuchar con micrófono (Chrome) <input type="checkbox" id="chkMic"></label>
+        <label for="selLang">Idioma de la canción
+          <select id="selLang"><option value="es-ES">Español</option><option value="en-US">Inglés</option><option value="pt-BR">Portugués</option></select>
+        </label>
+        <div>
+          <label for="rngOffset">Desfase de la letra <span class="mono" id="offsetVal">0.00 s</span></label>
+          <input type="range" id="rngOffset" min="-3000" max="3000" step="50" value="0">
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="hHist">
+      <h2 id="hHist">Rondas</h2>
+      <ul class="history" id="history"><li><small>Todavía no hay rondas.</small></li></ul>
+    </section>
+  </aside>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const COLORS = ["#ffc94a","#ff5d73","#4fe0b0","#6cc4ff","#c49bff","#ff9b4a","#f27fd8","#b8e05a"];
+const LEN_RANGES = {1:[1,2],2:[2,3],3:[3,5]};
+
+const DEMO_LRC = `[ti:Cielito lindo]
+[00:04.80]De la Sierra Morena, cielito lindo
+[00:09.60]vienen bajando
+[00:14.40]un par de ojitos negros, cielito lindo
+[00:19.20]de contrabando
+[00:24.00]Ay, ay, ay, ay
+[00:28.80]canta y no llores
+[00:33.60]porque cantando se alegran, cielito lindo
+[00:38.40]los corazones
+[00:43.20]Ese lunar que tienes, cielito lindo
+[00:48.00]junto a la boca
+[00:52.80]no se lo des a nadie, cielito lindo
+[00:57.60]que a mí me toca
+[01:02.40]Ay, ay, ay, ay
+[01:07.20]canta y no llores
+[01:12.00]porque cantando se alegran, cielito lindo
+[01:16.80]los corazones
+[01:21.60]Pájaro que abandona, cielito lindo
+[01:26.40]su primer nido
+[01:31.20]si lo encuentra ocupado, cielito lindo
+[01:36.00]bien merecido
+[01:40.80]`;
+
+/* ---------- Estado ---------- */
+const S = {
+  lines: [], player: null, source: "demo", title: "",
+  offset: 0, muted: false, muteWall: 0, muteIdx: -1, autoTarget: -1,
+  judging: false, nextAutoAt: 2, lastIdx: -2,
+  teams: [], rounds: [],
+  mode: "auto", len: 2, showLyrics: true, mic: false, lang: "es-ES",
+};
+
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem("caiga.v1") || "null");
+    if (d) {
+      S.teams = d.teams || []; S.rounds = d.rounds || [];
+      Object.assign(S, pick(d.settings || {}, ["mode","len","showLyrics","mic","lang","offset"]));
+    }
+  } catch (e) {}
+  if (!S.teams.length) S.teams = [mkTeam("Equipo Oro"), mkTeam("Equipo Coral")];
+}
+function save() {
+  try { localStorage.setItem("caiga.v1", JSON.stringify({ teams: S.teams, rounds: S.rounds,
+    settings: pick(S, ["mode","len","showLyrics","mic","lang","offset"]) })); } catch (e) {}
+}
+function pick(o, keys) { const r = {}; keys.forEach(k => { if (k in o) r[k] = o[k]; }); return r; }
+function mkTeam(name) {
+  const used = new Set(S.teams.map(t => t.color));
+  const color = COLORS.find(c => !used.has(c)) || COLORS[S.teams.length % COLORS.length];
+  return { id: Math.random().toString(36).slice(2, 9), name, color };
+}
+
+/* ---------- Utilidades ---------- */
+const fmt = s => { s = Math.max(0, s || 0); return Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0"); };
+let toastT;
+function toast(msg, ms = 3200) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, ms); }
+const rand = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+function loadScript(src) {
+  return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.async = true;
+    s.onload = res; s.onerror = () => rej(new Error("No se pudo cargar " + src)); document.head.appendChild(s); });
+}
+
+/* ---------- Letra LRC ---------- */
+function parseLRC(text) {
+  const out = [];
+  for (const raw of String(text).split(/\r?\n/)) {
+    const tags = [...raw.matchAll(/\[(\d{1,3}):(\d{1,2}(?:[.:]\d{1,3})?)\]/g)];
+    if (!tags.length) continue;
+    const txt = raw.replace(/\[[^\]]*\]/g, "").trim();
+    for (const m of tags) out.push({ t: +m[1] * 60 + parseFloat(m[2].replace(":", ".")), text: txt });
+  }
+  return out.sort((a, b) => a.t - b.t);
+}
+function lineAt(t) {
+  let lo = 0, hi = S.lines.length - 1, r = -1;
+  while (lo <= hi) { const m = (lo + hi) >> 1; if (S.lines[m].t <= t) { r = m; lo = m + 1; } else hi = m - 1; }
+  return r;
+}
+function textFrom(i, dir = 1) { while (i >= 0 && i < S.lines.length && !S.lines[i].text) i += dir; return i >= 0 && i < S.lines.length ? i : -1; }
+function setLyrics(lines, label) {
+  S.lines = lines; S.lastIdx = -2; S.nextAutoAt = Math.min(2, lines.length);
+  const n = lines.filter(l => l.text).length;
+  $("#lrcStatus").textContent = n ? `Letra: ${label} · ${n} líneas` : "Esa letra no trae marcas de tiempo";
+  render(true);
+}
+
+/* ---------- Reproductores ---------- */
+class DemoPlayer {
+  constructor() { this.ctx = null; this.pos = 0; this.playing = false; this.beat = 0.4; this.dur = 103; this.vol = 0.8; this.noise = null; }
+  async load() { return { title: "Cielito lindo · demo de dominio público" }; }
+  _ac() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext; this.ctx = new AC();
+      this.out = this.ctx.createGain(); this.out.gain.value = this.vol; this.out.connect(this.ctx.destination);
+      const b = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.05, this.ctx.sampleRate), d = b.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; this.noise = b;
+    }
+    return this.ctx;
+  }
+  play() {
+    const c = this._ac(); c.resume(); if (this.pos >= this.dur - 0.1) this.pos = 0;
+    this.t0 = c.currentTime - this.pos; this.next = Math.ceil(this.pos / this.beat - 1e-6); this.playing = true;
+    clearInterval(this.iv); this._sched(); this.iv = setInterval(() => this._sched(), 25);
+  }
+  pause() { if (!this.playing) return; this.pos = this.getTime(); this.playing = false; clearInterval(this.iv); }
+  seek(t) { const was = this.playing; this.pause(); this.pos = t; if (was) this.play(); }
+  getTime() { return this.playing ? Math.min(this.ctx.currentTime - this.t0, this.dur) : this.pos; }
+  isPlaying() { return this.playing; }
+  duration() { return this.dur; }
+  mute() { if (this.ctx) this.out.gain.setTargetAtTime(0, this.ctx.currentTime, 0.012); }
+  unmute() { if (this.ctx) this.out.gain.setTargetAtTime(this.vol, this.ctx.currentTime, 0.012); }
+  destroy() { this.pause(); if (this.ctx) this.ctx.close(); }
+  _sched() {
+    const c = this.ctx;
+    for (;;) {
+      const at = this.t0 + this.next * this.beat;
+      if (at > c.currentTime + 0.12) break;
+      if (this.next * this.beat >= this.dur) { this.pos = this.dur; this.playing = false; clearInterval(this.iv); onEnded(); break; }
+      if (at >= c.currentTime - 0.03) this._beat(this.next, Math.max(at, c.currentTime));
+      this.next++;
+    }
+  }
+  _beat(n, at) {
+    // Vals 3/4: cada línea de la letra son 4 compases. Progresión I-I-V-V / V-V-I-I en Sol.
+    const G = { bass: 98, notes: [392, 493.88, 587.33] }, D = { bass: 73.42, notes: [293.66, 369.99, 440] };
+    const prog = [G, G, D, D, D, D, G, G], ch = prog[Math.floor(n / 3) % 8];
+    if (n % 3 === 0) { this._kick(at); this._tone(ch.bass, at, 0.38, "triangle", 0.4); }
+    else { ch.notes.forEach(f => this._tone(f, at, 0.2, "sine", 0.06)); this._hat(at); }
+  }
+  _tone(f, at, len, type, g0) {
+    const c = this.ctx, o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(g0, at + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, at + len);
+    o.connect(g).connect(this.out); o.start(at); o.stop(at + len + 0.05);
+  }
+  _kick(at) {
+    const c = this.ctx, o = c.createOscillator(), g = c.createGain();
+    o.frequency.setValueAtTime(140, at); o.frequency.exponentialRampToValueAtTime(42, at + 0.12);
+    g.gain.setValueAtTime(0.9, at); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.26);
+    o.connect(g).connect(this.out); o.start(at); o.stop(at + 0.3);
+  }
+  _hat(at) {
+    const c = this.ctx, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = this.noise; f.type = "highpass"; f.frequency.value = 6000; g.gain.setValueAtTime(0.12, at); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.05);
+    s.connect(f).connect(g).connect(this.out); s.start(at);
+  }
+}
+
+class FilePlayer {
+  constructor(file) { this.file = file; this.a = new Audio(); this.a.preload = "auto"; this.a.onended = onEnded; }
+  load() {
+    return new Promise((res, rej) => {
+      this.a.src = URL.createObjectURL(this.file);
+      this.a.onloadedmetadata = () => res({ title: this.file.name.replace(/\.[^.]+$/, "") });
+      this.a.onerror = () => rej(new Error("El navegador no puede leer ese archivo de audio"));
+    });
+  }
+  play() { this.a.play(); } pause() { this.a.pause(); } seek(t) { this.a.currentTime = t; }
+  getTime() { return this.a.currentTime; } isPlaying() { return !this.a.paused && !this.a.ended; }
+  duration() { return this.a.duration || 0; }
+  mute() { this.a.muted = true; } unmute() { this.a.muted = false; }
+  destroy() { this.a.pause(); URL.revokeObjectURL(this.a.src); }
+}
+
+class YouTubePlayer {
+  constructor(id) { this.id = id; this.p = null; }
+  static api() {
+    if (window.YT && YT.Player) return Promise.resolve();
+    return new Promise((res, rej) => {
+      const prev = window.onYouTubeIframeAPIReady; window.onYouTubeIframeAPIReady = () => { prev && prev(); res(); };
+      loadScript("https://www.youtube.com/iframe_api").catch(rej);
+      setTimeout(() => rej(new Error("YouTube no respondió")), 12000);
+    });
+  }
+  async load() {
+    await YouTubePlayer.api();
+    $("#ytWrap").hidden = false; $("#ytWrap").innerHTML = '<div id="ytPlayer"></div>';
+    await new Promise((res, rej) => {
+      this.p = new YT.Player("ytPlayer", { videoId: this.id, playerVars: { playsinline: 1, rel: 0, controls: 1 },
+        events: {
+          onReady: res,
+          onStateChange: e => { if (e.data === YT.PlayerState.ENDED) onEnded(); },
+          onError: e => { const m = { 2: "enlace no válido", 5: "error del reproductor", 100: "video no encontrado", 101: "el dueño no permite insertarlo", 150: "el dueño no permite insertarlo" }[e.data] || "error " + e.data;
+            toast("YouTube: " + m + ". Prueba otra versión de la canción.", 5000); rej(new Error(m)); },
+        } });
+    });
+    const d = this.p.getVideoData ? this.p.getVideoData() : {};
+    return { title: d.title || "Video de YouTube", query: cleanTitle(d.title || "", d.author || "") };
+  }
+  play() { this.p.playVideo(); } pause() { this.p.pauseVideo(); } seek(t) { this.p.seekTo(t, true); }
+  getTime() { return this.p && this.p.getCurrentTime ? this.p.getCurrentTime() : 0; }
+  isPlaying() { return !!this.p && this.p.getPlayerState && this.p.getPlayerState() === 1; }
+  duration() { return this.p && this.p.getDuration ? this.p.getDuration() : 0; }
+  mute() { this.p.mute(); } unmute() { this.p.unMute(); }
+  destroy() { try { this.p && this.p.destroy(); } catch (e) {} $("#ytWrap").hidden = true; }
+}
+
+class ApplePlayer {
+  constructor(token, songId) { this.token = token; this.songId = songId; this.m = null; this.vol = 1; }
+  async load() {
+    if (!window.MusicKit) {
+      const ready = new Promise(r => document.addEventListener("musickitloaded", r, { once: true }));
+      await loadScript("https://js-cdn.music.apple.com/musickit/v3/musickit.js"); await ready;
+    }
+    await MusicKit.configure({ developerToken: this.token, app: { name: "Caiga en la Nota", build: "1.0.0" } });
+    this.m = MusicKit.getInstance();
+    await this.m.authorize();
+    await this.m.setQueue({ song: this.songId, startPlaying: false });
+    const it = this.m.queue && this.m.queue.items && this.m.queue.items[0], a = (it && it.attributes) || {};
+    return { title: [a.name, a.artistName].filter(Boolean).join(" · ") || "Apple Music", query: [a.name, a.artistName].filter(Boolean).join(" ") };
+  }
+  play() { this.m.play(); } pause() { this.m.pause(); } seek(t) { this.m.seekToTime(t); }
+  getTime() { return this.m ? this.m.currentPlaybackTime || 0 : 0; }
+  isPlaying() { return !!this.m && this.m.isPlaying; }
+  duration() { return this.m ? this.m.currentPlaybackDuration || 0 : 0; }
+  mute() { this.vol = this.m.volume || 1; this.m.volume = 0; } unmute() { this.m.volume = this.vol; }
+  destroy() { try { this.m && this.m.stop(); } catch (e) {} }
+}
+
+function cleanTitle(title, author) {
+  let t = title.replace(/\((official|oficial|lyric|letra|audio|video|visualizer|hd|4k)[^)]*\)|\[[^\]]*\]/gi, "")
+               .replace(/\b(official|oficial)\s+(music\s+)?(video|audio)\b/gi, "").trim();
+  if (!t.includes("-") && author) t += " " + author.replace(/\s*-\s*Topic$/i, "").replace(/VEVO$/i, "");
+  return t.replace(/\s+/g, " ").trim();
+}
+function ytId(u) {
+  u = (u || "").trim(); if (/^[\w-]{11}$/.test(u)) return u;
+  try {
+    const x = new URL(u);
+    if (x.hostname.endsWith("youtu.be")) return x.pathname.slice(1, 12);
+    if (x.searchParams.get("v")) return x.searchParams.get("v");
+    const m = x.pathname.match(/\/(shorts|embed|live)\/([\w-]{11})/); if (m) return m[2];
+  } catch (e) {}
+  return null;
+}
+function appleId(u) {
+  u = (u || "").trim(); if (/^\d+$/.test(u)) return u;
+  try { const x = new URL(u); return x.searchParams.get("i") || (x.pathname.match(/\/song\/[^/]+\/(\d+)/) || [])[1] || null; } catch (e) { return null; }
+}
+
+async function useSource(kind, player, quiet) {
+  if (S.muted) doUnmute(true);
+  if (S.player) { try { S.player.pause(); S.player.destroy(); } catch (e) {} }
+  S.player = null; S.source = kind; closeJudge();
+  $("#srcStatus").textContent = "Cargando…";
+  try {
+    const info = await player.load();
+    S.player = player; S.title = info.title;
+    $("#songTitle").textContent = info.title;
+    $("#srcStatus").textContent = "Fuente: " + { demo: "demo", file: "archivo local", youtube: "YouTube", apple: "Apple Music" }[kind] + " · lista";
+    if (info.query) { $("#lrcQuery").value = info.query; searchLyrics(info.query); }
+    if (!quiet) toast("Canción lista. Busca su letra y pulsa Reproducir.");
+  } catch (e) {
+    $("#srcStatus").textContent = "No se pudo cargar: " + (e && e.message || e);
+    try { player.destroy(); } catch (x) {}
+  }
+  render(true);
+}
+
+/* ---------- Búsqueda de letras ---------- */
+async function searchLyrics(q) {
+  const ul = $("#lrcResults"); ul.innerHTML = "<li class='note'>Buscando…</li>";
+  try {
+    const r = await fetch("https://lrclib.net/api/search?q=" + encodeURIComponent(q));
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const list = (await r.json()).filter(x => x.syncedLyrics).slice(0, 10);
+    ul.innerHTML = "";
+    if (!list.length) { ul.innerHTML = "<li class='note'>No hay letras sincronizadas para esa búsqueda. Prueba con otro título o pega un LRC.</li>"; return; }
+    const pd = S.player && S.player.duration();
+    for (const x of list) {
+      const li = document.createElement("li"), b = document.createElement("button");
+      const off = pd ? Math.abs(pd - x.duration) : 0;
+      b.innerHTML = `<b></b><small></small>`;
+      b.querySelector("b").textContent = `${x.trackName} — ${x.artistName}`;
+      b.querySelector("small").textContent = `${x.albumName || ""} · ${fmt(x.duration)}${pd && off > 3 ? " · la duración no coincide" : pd ? " · misma duración" : ""}`;
+      b.onclick = () => { setLyrics(parseLRC(x.syncedLyrics), `${x.trackName} — ${x.artistName}`); ul.innerHTML = ""; };
+      li.appendChild(b); ul.appendChild(li);
+    }
+  } catch (e) {
+    ul.innerHTML = "<li class='note'>No se pudo consultar LRCLIB desde aquí. Pega la letra en formato LRC.</li>";
+  }
+}
+
+/* ---------- Silencio y revelación ---------- */
+const curT = () => (S.player ? S.player.getTime() : 0) + S.offset / 1000;
+const curIdx = () => lineAt(curT());
+
+function doMute() {
+  if (S.muted || !S.player || !S.player.isPlaying()) return;
+  closeJudge();
+  S.player.mute(); S.muted = true; S.muteWall = performance.now(); S.muteIdx = curIdx();
+  $("#stage").classList.add("is-muted"); $("#muteOverlay").hidden = false; $("#micLive").textContent = "";
+  $("#lPrev").textContent = ""; $("#lCur").textContent = ""; $("#lNext").textContent = "";
+  startMic();
+}
+function doUnmute(silent) {
+  if (!S.muted) return;
+  S.player && S.player.unmute(); S.muted = false; S.autoTarget = -1;
+  $("#stage").classList.remove("is-muted"); $("#muteOverlay").hidden = true;
+  const secs = (performance.now() - S.muteWall) / 1000;
+  stopMic();
+  if (silent) return;
+  let idx = curIdx(); if (idx < 0 || !S.lines[idx].text) idx = textFrom(Math.max(idx, 0));
+  if (idx < 0) idx = textFrom(S.lines.length - 1, -1);
+  openJudge(idx, secs);
+}
+function openJudge(idx, secs) {
+  const line = idx >= 0 ? S.lines[idx].text : "(sin letra cargada)";
+  const round = { n: S.rounds.length + 1, line, secs: +secs.toFixed(1), muteIdx: S.muteIdx, idx, awards: {}, at: Date.now() };
+  S.rounds.push(round); S.judging = true; save();
+  $("#judgeRound").textContent = `Ronda ${round.n} · la canción va en`;
+  $("#judgeLine").textContent = "«" + line + "»";
+  $("#judgeMeta").textContent = `Silencio de ${round.secs} s. Marca qué equipos cayeron en la nota.`;
+  $("#micResult").hidden = true;
+  $("#judge").hidden = false;
+  renderJudge(); render(true);
+  $("#lCur").classList.remove("revealed"); void $("#lCur").offsetWidth; $("#lCur").classList.add("revealed");
+  if (S.mic) setTimeout(() => evaluateMic(round), 900);
+}
+function closeJudge() {
+  if (!S.judging) { $("#judge").hidden = true; return; }
+  S.judging = false; $("#judge").hidden = true;
+  const i = Math.max(curIdx(), 0); S.nextAutoAt = i + rand(3, 5);
+}
+function award(teamId, pts) {
+  const r = S.rounds[S.rounds.length - 1]; if (!r || !S.judging) return;
+  if (r.awards[teamId] === pts) delete r.awards[teamId]; else r.awards[teamId] = pts;
+  save(); renderJudge(); renderBoard(); renderHistory();
+}
+function renderJudge() {
+  const r = S.rounds[S.rounds.length - 1], box = $("#judgeRows"); box.innerHTML = "";
+  if (!S.teams.length) { box.innerHTML = "<p class='note'>Agrega equipos en el marcador para dar puntos.</p>"; return; }
+  S.teams.forEach((t, i) => {
+    const row = document.createElement("div"); row.className = "jrow";
+    row.innerHTML = `<span class="name"><span class="dot" style="--c:${t.color}"></span><span></span>${i < 9 ? ` <kbd>${i + 1}</kbd>` : ""}</span><span class="opts"></span>`;
+    row.querySelector(".name span:nth-child(2)").textContent = t.name;
+    [["g", 100, "En la nota +100"], ["c", 50, "Cerca +50"], ["f", 0, "Perdidos 0"]].forEach(([cls, pts, label]) => {
+      const b = document.createElement("button"); b.className = "opt " + cls; b.textContent = label;
+      b.setAttribute("aria-pressed", String(r && r.awards[t.id] === pts));
+      b.onclick = () => award(t.id, pts); row.querySelector(".opts").appendChild(b);
+    });
+    box.appendChild(row);
+  });
+}
+
+/* ---------- Micrófono (Web Speech API) ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, micFinal = "", micInterim = "", micOn = false;
+function startMic() {
+  micFinal = ""; micInterim = "";
+  if (!S.mic) return;
+  if (!SR) { $("#micLive").textContent = "Este navegador no reconoce voz. Usa Chrome o Edge."; return; }
+  micOn = true;
+  const go = () => {
+    rec = new SR(); rec.lang = S.lang; rec.continuous = true; rec.interimResults = true;
+    rec.onresult = e => {
+      micInterim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) micFinal += " " + e.results[i][0].transcript; else micInterim += " " + e.results[i][0].transcript;
+      }
+      $("#micLive").textContent = "Se escucha: " + (micFinal + micInterim).trim().split(/\s+/).slice(-14).join(" ");
+    };
+    rec.onerror = e => { if (e.error === "not-allowed" || e.error === "service-not-allowed") { micOn = false; $("#micLive").textContent = "El micrófono está bloqueado en esta página."; } };
+    rec.onend = () => { if (micOn && S.muted) { try { go(); } catch (x) {} } };
+    try { rec.start(); $("#micLive").textContent = "Escuchando…"; } catch (x) {}
+  };
+  go();
+}
+function stopMic() { micOn = false; if (rec) { try { rec.stop(); } catch (e) {} } }
+const norm = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9\s']/g, " ").split(/\s+/).filter(Boolean);
+function lcs(a, b) {
+  if (!a.length || !b.length) return 0;
+  let prev = new Array(b.length + 1).fill(0);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [0];
+    for (let j = 1; j <= b.length; j++) cur[j] = a[i - 1] === b[j - 1] ? prev[j - 1] + 1 : Math.max(prev[j], cur[j - 1]);
+    prev = cur;
+  }
+  return prev[b.length];
+}
+function evaluateMic(round) {
+  const box = $("#micResult"); box.hidden = false;
+  const sung = norm(micFinal + " " + micInterim);
+  if (!sung.length) { box.innerHTML = "<strong>Micrófono:</strong> no se escuchó a nadie cantar."; return; }
+  const from = Math.max(round.muteIdx, 0), to = Math.max(round.idx - 1, from);
+  const expected = S.lines.slice(from, to + 1).map(l => l.text).join(" ");
+  const cover = Math.round(100 * lcs(sung, norm(expected)) / Math.max(1, norm(expected).length));
+  const tail = sung.slice(-6);
+  let best = -1, bestScore = 0;
+  for (let j = Math.max(0, from - 1); j <= Math.min(S.lines.length - 1, round.idx + 2); j++) {
+    const w = norm(S.lines[j].text); if (!w.length) continue;
+    const sc = lcs(tail, w) / Math.min(tail.length, w.length);
+    if (sc > bestScore + 0.001) { bestScore = sc; best = j; }
+  }
+  let verdict = "Perdidos", where = "";
+  if (best >= 0 && bestScore >= 0.34) {
+    const d = round.idx - best;
+    verdict = d === 0 || d === 1 ? "En la nota" : d === 2 || d === -1 ? "Cerca" : "Perdidos";
+    where = ` Al volver la música iban en «${S.lines[best].text}».`;
+  }
+  box.innerHTML = `<strong>Micrófono:</strong> letra acertada ${cover}%.<span></span> Sugerencia: <strong>${verdict}</strong>.`;
+  box.querySelector("span").textContent = where;
+}
+
+/* ---------- Render ---------- */
+function render(force) {
+  const idx = curIdx();
+  if (!force && idx === S.lastIdx) return;
+  S.lastIdx = idx;
+  const L = S.lines, show = S.showLyrics || S.judging;
+  let prev = "", cur = "♪", next = "";
+  if (!L.length) cur = "Carga una letra para empezar";
+  else if (idx < 0) { cur = "♪ Intro ♪"; const n = textFrom(0); next = show && n >= 0 ? L[n].text : ""; }
+  else {
+    cur = L[idx].text || "♪";
+    if (show) { const p = textFrom(idx - 1, -1), n = textFrom(idx + 1); prev = p >= 0 ? L[p].text : ""; next = n >= 0 ? L[n].text : ""; }
+    else if (L[idx].text) cur = "♪ ♪ ♪";
+  }
+  $("#lPrev").textContent = prev; $("#lCur").textContent = cur; $("#lNext").textContent = next;
+  const r = S.rounds[S.rounds.length - 1];
+  $("#lCur").classList.toggle("revealed", !!(S.judging && r && idx === r.idx));
+}
+function renderBoard() {
+  const score = {}; S.teams.forEach(t => score[t.id] = 0);
+  S.rounds.forEach(r => Object.entries(r.awards).forEach(([id, p]) => { if (id in score) score[id] += p; }));
+  const max = Math.max(100, ...Object.values(score));
+  const ol = $("#board"); ol.innerHTML = "";
+  [...S.teams].sort((a, b) => score[b.id] - score[a.id]).forEach((t, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="rank">${i + 1}</span><span class="who"><b><span class="dot" style="--c:${t.color}"></span><span></span></b><div class="bar" style="--c:${t.color};width:${(100 * score[t.id] / max).toFixed(1)}%"></div></span><span class="pts">${score[t.id]}</span><button class="x" aria-label="Quitar equipo">×</button>`;
+    li.querySelector("b span:last-child").textContent = t.name;
+    li.querySelector(".x").onclick = () => { S.teams = S.teams.filter(x => x.id !== t.id); save(); renderBoard(); if (S.judging) renderJudge(); };
+    ol.appendChild(li);
+  });
+  if (!S.teams.length) ol.innerHTML = "<li class='note'>Agrega al menos un equipo.</li>";
+}
+function renderHistory() {
+  const ul = $("#history"); ul.innerHTML = "";
+  if (!S.rounds.length) { ul.innerHTML = "<li><small>Todavía no hay rondas.</small></li>"; return; }
+  [...S.rounds].reverse().slice(0, 30).forEach(r => {
+    const li = document.createElement("li");
+    const winners = S.teams.filter(t => r.awards[t.id] > 0).map(t => `${t.name} +${r.awards[t.id]}`).join(", ") || "sin puntos";
+    li.innerHTML = "<div></div><small></small>";
+    li.firstChild.textContent = `Ronda ${r.n}: «${r.line}»`;
+    li.lastChild.textContent = `${r.secs} s en silencio · ${winners}`;
+    ul.appendChild(li);
+  });
+}
+
+/* ---------- Bucle principal ---------- */
+function tick() {
+  const p = S.player, playing = !!p && p.isPlaying();
+  const t = p ? p.getTime() : 0, d = p ? p.duration() : 0;
+  $("#clock").textContent = `${fmt(t)} / ${fmt(d)}`;
+  $("#prog").style.width = d ? (100 * t / d).toFixed(2) + "%" : "0";
+  $("#btnPlay").firstChild.textContent = playing ? "Pausar " : "Reproducir ";
+  $("#btnMute").disabled = !playing && !S.muted;
+  if (S.muted) {
+    $("#muteTimer").textContent = ((performance.now() - S.muteWall) / 1000).toFixed(1) + " s";
+    if (S.autoTarget >= 0 && curIdx() >= S.autoTarget) doUnmute();
+  } else {
+    const idx = curIdx();
+    if (S.mode === "auto" && playing && !S.judging && S.lines.length && idx !== S.lastIdx && idx >= S.nextAutoAt && S.lines[idx] && S.lines[idx].text) {
+      const [a, b] = LEN_RANGES[S.len], target = textFrom(idx + rand(a, b));
+      if (target > idx) { S.autoTarget = target; doMute(); }
+    }
+    render(false);
+  }
+  requestAnimationFrame(tick);
+}
+function onEnded() { if (S.muted) doUnmute(); }
+
+/* ---------- Controles ---------- */
+function togglePlay() {
+  const p = S.player; if (!p) { toast("Primero carga una canción."); return; }
+  if (p.isPlaying()) p.pause(); else p.play();
+}
+function toggleMute() {
+  if (S.muted) doUnmute();
+  else if (S.player && S.player.isPlaying()) { S.autoTarget = -1; doMute(); }
+}
+$("#btnPlay").onclick = togglePlay;
+$("#btnMute").onclick = toggleMute;
+$("#btnUnmute").onclick = () => doUnmute();
+$("#btnRestart").onclick = () => { if (!S.player) return; if (S.muted) doUnmute(true); closeJudge(); S.player.seek(0); S.nextAutoAt = 2; S.lastIdx = -2; };
+$("#btnNext").onclick = closeJudge;
+$("#btnSync").onclick = () => {
+  if (!S.player || !S.lines.length) return;
+  const raw = S.player.getTime(); let best = null;
+  for (const l of S.lines) if (l.text && (!best || Math.abs(l.t - raw - S.offset / 1000) < Math.abs(best.t - raw - S.offset / 1000))) best = l;
+  if (!best || Math.abs(best.t - raw - S.offset / 1000) > 3) { toast("No hay una línea cerca de este momento."); return; }
+  setOffset(Math.round((best.t - raw) * 1000 / 50) * 50);
+  toast(`Letra ajustada a «${best.text}»`);
+};
+function setOffset(ms) {
+  S.offset = Math.max(-3000, Math.min(3000, ms)); $("#rngOffset").value = S.offset;
+  $("#offsetVal").textContent = (S.offset >= 0 ? "+" : "") + (S.offset / 1000).toFixed(2) + " s"; S.lastIdx = -2; save();
+}
+$("#rngOffset").oninput = e => setOffset(+e.target.value);
+
+document.addEventListener("keydown", e => {
+  if (e.target.closest("input,textarea,select")) return;
+  if (e.code === "Space") { e.preventDefault(); toggleMute(); }
+  else if (e.key === "p" || e.key === "P") togglePlay();
+  else if (e.key === "Enter" && S.judging && !e.target.closest("button")) { e.preventDefault(); closeJudge(); }
+  else if (/^[1-9]$/.test(e.key) && S.judging) { const t = S.teams[+e.key - 1]; if (t) award(t.id, 100); }
+});
+
+$("#teamForm").onsubmit = e => {
+  e.preventDefault(); const n = $("#teamName").value.trim(); if (!n) return;
+  S.teams.push(mkTeam(n)); $("#teamName").value = ""; save(); renderBoard(); if (S.judging) renderJudge();
+};
+$("#btnResetScores").onclick = () => {
+  const b = $("#btnResetScores");
+  if (b.dataset.armed) { S.rounds = []; closeJudge(); save(); renderBoard(); renderHistory(); b.textContent = "Reiniciar puntajes"; delete b.dataset.armed; return; }
+  b.dataset.armed = "1"; b.textContent = "Confirmar: borrar todas las rondas";
+  setTimeout(() => { delete b.dataset.armed; b.textContent = "Reiniciar puntajes"; }, 4000);
+};
+
+$("#srcTabs").onclick = e => {
+  const b = e.target.closest("button[data-src]"); if (!b) return;
+  document.querySelectorAll("#srcTabs button").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+  document.querySelectorAll("[data-panel]").forEach(p => p.hidden = p.dataset.panel !== b.dataset.src);
+};
+$("#ytForm").onsubmit = e => {
+  e.preventDefault(); const id = ytId($("#ytUrl").value);
+  if (!id) { toast("Ese enlace no parece de YouTube."); return; }
+  useSource("youtube", new YouTubePlayer(id));
+};
+$("#amForm").onsubmit = e => {
+  e.preventDefault(); const tok = $("#amToken").value.trim(), id = appleId($("#amSong").value);
+  if (!tok) { toast("Falta el developer token de MusicKit."); return; }
+  if (!id) { toast("Pega el enlace de una canción (con ?i=…) o su ID numérico."); return; }
+  useSource("apple", new ApplePlayer(tok, id));
+};
+$("#fileIn").onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  useSource("file", new FilePlayer(f)).then(() => { const q = f.name.replace(/\.[^.]+$/, "").replace(/[_]+/g, " "); $("#lrcQuery").value = q; searchLyrics(q); });
+};
+$("#btnDemo").onclick = () => { useSource("demo", new DemoPlayer()); setLyrics(parseLRC(DEMO_LRC), "Cielito lindo (demo)"); };
+$("#lrcForm").onsubmit = e => { e.preventDefault(); const q = $("#lrcQuery").value.trim(); if (q) searchLyrics(q); };
+$("#btnPaste").onclick = () => {
+  const l = parseLRC($("#lrcPaste").value);
+  if (!l.length) { toast("No encontré marcas de tiempo como [01:23.45]."); return; }
+  setLyrics(l, "pegada a mano");
+};
+
+function bindSeg(id, key, cast) {
+  const el = $(id);
+  const sync = () => el.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(cast(b.dataset.v) === S[key])));
+  el.onclick = e => { const b = e.target.closest("button"); if (!b) return; e.preventDefault(); S[key] = cast(b.dataset.v); sync(); save(); };
+  sync();
+}
+bindSeg("#segMode", "mode", String);
+bindSeg("#segLen", "len", Number);
+$("#chkShow").onchange = e => { S.showLyrics = e.target.checked; save(); render(true); };
+$("#chkMic").onchange = e => { S.mic = e.target.checked; save(); if (S.mic && !SR) toast("Tu navegador no reconoce voz. Usa Chrome o Edge."); };
+$("#selLang").onchange = e => { S.lang = e.target.value; save(); };
+
+/* ---------- Inicio ---------- */
+load();
+$("#chkShow").checked = S.showLyrics; $("#chkMic").checked = S.mic; $("#selLang").value = S.lang;
+bindSeg("#segMode", "mode", String); bindSeg("#segLen", "len", Number); setOffset(S.offset);
+renderBoard(); renderHistory();
+setLyrics(parseLRC(DEMO_LRC), "Cielito lindo (demo)");
+useSource("demo", new DemoPlayer(), true);
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
