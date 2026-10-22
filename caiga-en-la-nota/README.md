@@ -36,7 +36,7 @@ Las letras sincronizadas se buscan en [LRCLIB](https://lrclib.net) o se pegan en
 - **Micrófono (experimental, Chrome/Edge):** transcribe lo que canta durante el silencio y sugiere una calificación.
 - **Ajuste de letra por canción:** si la letra no va a tiempo, pulsa **La letra va tarde** (`→`) o **La letra va antes** (`←`), de 0.25 s en 0.25 s, o **Ajustar letra aquí** justo cuando el cantante empiece una línea. El ajuste queda guardado para ese video en ese navegador.
 - **Dejar los ajustes fijos:** en la tarjeta *Ajustes de letra*, **Copiar ajustes** copia los valores; se pegan en `OFFSETS` dentro de `index.html` para que sirvan en cualquier dispositivo.
-- El silencio nunca dura más que el tiempo hasta la línea de regreso más 3 s (máximo 30 s); si el video quedó detenido al volver el sonido, se reanuda solo.
+- Durante el silencio (automático o manual) el juego lleva su propio reloj: la letra sigue avanzando aunque YouTube se pause, y al volver el sonido el video salta al punto donde va la canción. El silencio nunca dura más que el tiempo hasta la línea de regreso más 3 s (máximo 30 s).
 
 Atajos: `Espacio` silenciar/volver · `P` reproducir/pausar · `←` `→` ajustar letra · `1` en la nota · `2` cerca · `3` perdido · `Enter` siguiente ronda · `D` diagnóstico (estado del reproductor, tiempo, línea y errores).
 

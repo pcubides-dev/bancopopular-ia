@@ -789,13 +789,27 @@ async function searchLyrics(q) {
 }
 
 /* ---------- Silencio y revelación ---------- */
-const curT = () => (S.player ? S.player.getTime() : 0) + S.offset / 1000;
+// Tiempo de la canción. Durante el silencio el juego lleva su propio reloj desde que se silenció: si el
+// reproductor se pausa (YouTube lo hace a veces con el silencio manual), la letra sigue avanzando igual.
+function mediaTime() {
+  const t = S.player ? S.player.getTime() : 0;
+  if (!S.muted || S.muteMediaT == null) return t;
+  let exp = S.muteMediaT + (performance.now() - S.muteWall) / 1000;
+  const d = S.player ? S.player.duration() : 0; if (d) exp = Math.min(exp, d);
+  return Math.max(t, exp);
+}
+const curT = () => mediaTime() + S.offset / 1000;
 const curIdx = () => lineAt(curT());
 
 function doMute() {
   if (S.muted || S.turnDone || !S.player || !S.player.isPlaying()) return;
-  closeJudge();
-  S.player.mute(); S.muted = true; S.muteWall = performance.now(); S.muteIdx = curIdx();
+  // Si la ronda abierta era la última del turno, silenciar no debe cerrar el turno (eso pausaba la canción).
+  const r = S.rounds[S.rounds.length - 1];
+  if (S.judging && S.perTurn && r && r.turnRound >= S.perTurn) { toast("El turno ya terminó: pulsa Enter para cerrarlo."); return; }
+  if (S.judging) { S.judging = false; $("#judge").hidden = true; }
+  S.muteMediaT = S.player.getTime(); S.muteWall = performance.now();
+  S.player.mute(); S.muted = true; S.muteIdx = curIdx();
+  if (S.player.ids) S.player.want = true;
   // Plazo máximo del silencio: lo que falta hasta la línea objetivo más 3 s (25 s en modo manual; nunca más de 30 s).
   const left = S.autoTarget >= 0 ? S.lines[S.autoTarget].t - curT() : 22;
   S.muteDeadline = S.muteWall + Math.min(30, Math.max(4, left + 3)) * 1000;
@@ -805,7 +819,14 @@ function doMute() {
 }
 function doUnmute(silent) {
   if (!S.muted) return;
-  S.player && S.player.unmute(); S.muted = false; S.autoTarget = -1;
+  // Al volver el sonido, si el reproductor quedó atrás (se pausó o se trabó), se lleva al punto donde va la canción.
+  const pl0 = S.player, target = mediaTime();
+  S.muted = false; S.muteMediaT = null;
+  pl0 && pl0.unmute(); S.autoTarget = -1;
+  if (pl0 && !silent) {
+    if (Math.abs(pl0.getTime() - target) > 0.6) pl0.seek(target);
+    if (!pl0.isPlaying()) pl0.play();
+  }
   $("#stage").classList.remove("is-muted"); $("#muteOverlay").hidden = true;
   const secs = (performance.now() - S.muteWall) / 1000;
   stopMic();
@@ -1031,7 +1052,9 @@ function step() {
   $("#btnMute").disabled = !playing && !S.muted;
   if (S.muted) {
     $("#muteTimer").textContent = ((performance.now() - S.muteWall) / 1000).toFixed(1) + " s";
-    if (p && p.want === true && p.state && p.state() === 2 && performance.now() - (S.lastResume || 0) > 800) { S.lastResume = performance.now(); p.play(); }
+    // Durante el silencio la canción debe seguir corriendo: si el reproductor se pausó, se reanuda sin sonido.
+    const paused = p && (p.state ? p.state() === 2 : !p.isPlaying());
+    if (paused && performance.now() - (S.lastResume || 0) > 800) { S.lastResume = performance.now(); p.play(); p.mute(); }
     if ((S.autoTarget >= 0 && curIdx() >= S.autoTarget) || performance.now() > S.muteDeadline) doUnmute();
   } else {
     const idx = curIdx();
