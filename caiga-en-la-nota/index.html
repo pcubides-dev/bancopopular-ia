@@ -333,6 +333,7 @@ details summary{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px
 <script>
 "use strict";
 const $ = s => document.querySelector(s);
+const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const COLORS = ["#ffc94a","#ff5d73","#4fe0b0","#6cc4ff","#c49bff","#ff9b4a","#f27fd8","#b8e05a"];
 const LEN_RANGES = {1:[1,2],2:[2,3],3:[3,5]};
 
@@ -534,7 +535,7 @@ class YouTubePlayer {
     await YouTubePlayer.api();
     $("#ytWrap").hidden = false; $("#ytWrap").innerHTML = '<div id="ytPlayer"></div>';
     await new Promise(res => {
-      this.p = new YT.Player("ytPlayer", { videoId: this.id, playerVars: { playsinline: 1, rel: 0, controls: 1 },
+      this.p = new YT.Player("ytPlayer", { videoId: this.id, playerVars: { playsinline: 1, rel: 0, controls: 1, disablekb: 1 },
         events: {
           onReady: res,
           onStateChange: e => {
@@ -559,17 +560,19 @@ class YouTubePlayer {
   getTime() { return this.p && this.p.getCurrentTime ? this.p.getCurrentTime() : 0; }
   isPlaying() { return !!this.p && this.p.getPlayerState && this.p.getPlayerState() === 1; }
   duration() { return this.p && this.p.getDuration ? this.p.getDuration() : 0; }
-  mute() { this.silenced = true; try { this.p.mute(); this.p.setVolume(0); } catch (e) {} }
-  // YouTube a veces ignora unMute(); se repite hasta comprobar que de verdad volvió el volumen.
+  // El silencio baja el volumen a 0 en vez de usar mute(): algunos navegadores detienen el video cuando
+  // se le quita el mute por código. iPhone/iPad no dejan cambiar el volumen, así que ahí se usa mute().
+  mute() { this.silenced = true; try { if (IOS) this.p.mute(); else this.p.setVolume(0); } catch (e) {} }
   unmute() {
     this.silenced = false;
     const fix = n => {
       if (this.silenced) return;
-      try { this.p.unMute(); this.p.setVolume(100); } catch (e) {}
-      if (n > 0) setTimeout(() => { try { if (!this.silenced && (this.p.isMuted() || this.p.getVolume() < 100)) fix(n - 1); } catch (e) {} }, 250);
+      try { if (IOS || this.p.isMuted()) this.p.unMute(); if (!IOS) this.p.setVolume(100); } catch (e) {}
+      if (n > 0) setTimeout(() => { try { if (!this.silenced && (this.p.isMuted() || (!IOS && this.p.getVolume() < 100))) fix(n - 1); } catch (e) {} }, 250);
     };
     fix(8);
   }
+  state() { try { return this.p.getPlayerState(); } catch (e) { return -1; } }
   destroy() { try { this.p && this.p.destroy(); } catch (e) {} $("#ytWrap").hidden = true; }
 }
 
@@ -1012,6 +1015,7 @@ function tick() {
   $("#btnMute").disabled = !playing && !S.muted;
   if (S.muted) {
     $("#muteTimer").textContent = ((performance.now() - S.muteWall) / 1000).toFixed(1) + " s";
+    if (p && p.want === true && p.state && p.state() === 2 && performance.now() - (S.lastResume || 0) > 800) { S.lastResume = performance.now(); p.play(); }
     if ((S.autoTarget >= 0 && curIdx() >= S.autoTarget) || performance.now() > S.muteDeadline) doUnmute();
   } else {
     const idx = curIdx();
@@ -1080,10 +1084,15 @@ $("#btnCopyOffsets").onclick = async () => {
   catch (e) { $("#offsetText").hidden = false; $("#offsetText").value = txt; $("#offsetText").select(); toast("Copia el texto seleccionado."); }
 };
 
+document.addEventListener("keyup", e => { if (e.code === "Space" && e.target.closest("button")) e.preventDefault(); });
+document.addEventListener("click", e => { const b = e.target.closest("button"); if (b && e.detail > 0) b.blur(); });
+window.addEventListener("blur", () => setTimeout(() => {
+  const a = document.activeElement; if (a && a.tagName === "IFRAME") { a.blur(); window.focus(); }
+}, 0));
 document.addEventListener("keydown", e => {
   if (e.target.closest("input,textarea,select")) return;
   if (!$("#drawOverlay").hidden) { if (e.code === "Space" && !e.target.closest("button")) { e.preventDefault(); runDraw(); } return; }
-  if (e.code === "Space") { e.preventDefault(); toggleMute(); }
+  if (e.code === "Space") { e.preventDefault(); if (!e.repeat) toggleMute(); }
   else if (e.key === "p" || e.key === "P") togglePlay();
   else if (e.key === "ArrowRight") { e.preventDefault(); nudge(250); }
   else if (e.key === "ArrowLeft") { e.preventDefault(); nudge(-250); }
