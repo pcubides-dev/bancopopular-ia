@@ -93,7 +93,16 @@ kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-b
 .who input::placeholder{color:#ffd0d4}
 .draw-song{font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(32px,6vw,72px);line-height:1.02;text-wrap:balance;min-height:1.05em}
 .draw-cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;width:100%}
-.draw-cards li{background:rgba(0,0,0,.22);border:2px solid rgba(255,255,255,.18);border-radius:16px;padding:14px 12px;font-weight:900;font-size:17px;transition:background .08s,transform .08s}
+.draw-cards li{background:rgba(0,0,0,.22);border:2px solid rgba(255,255,255,.18);border-radius:16px;font-weight:900;font-size:17px;transition:background .08s,transform .08s}
+.draw-cards li button{all:unset;box-sizing:border-box;display:block;width:100%;height:100%;padding:14px 12px;cursor:pointer;border-radius:14px;text-align:center}
+.draw-cards li button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.draw-cards li:not(.off):hover{border-color:#fff}
+.draw-cards li.off button{cursor:not-allowed}
+.draw-who{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+input[type=text].draw-player{width:min(420px,100%);text-align:center;font-size:clamp(22px,3vw,30px);font-weight:900;background:rgba(0,0,0,.28);border:2px solid rgba(255,255,255,.5);border-radius:16px;padding:10px 16px;color:#fff}
+.draw-player::placeholder{color:#ffc7cc;font-weight:700}
+input[type=text].draw-player:focus{border-color:var(--gold);outline:none}
+.draw-hint{margin:0;color:#ffd9dc;font-weight:700}
 .draw-cards li.off{opacity:.35}
 .draw-cards li.on{background:#fff;color:#a0000a;border-color:#fff;transform:scale(1.04)}
 .draw-cards li.win{background:var(--gold);color:#2b1800;border-color:var(--gold);transform:scale(1.08)}
@@ -323,11 +332,15 @@ details summary{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px
   <div class="draw-inner">
     <div class="brand"><img src="logo-terpel-blanco.png" alt="Terpel" width="156" height="48"><span class="sep"></span><span class="logo">Caiga en la <span>Nota</span></span></div>
     <div class="mute-tag">Sorteo de canción · Fonseca</div>
-    <div class="draw-name" id="drawName">¿Quién canta?</div>
+    <form class="draw-who" id="drawWho">
+      <label class="draw-name" for="drawPlayer">¿Quién canta?</label>
+      <input type="text" id="drawPlayer" class="draw-player" maxlength="24" placeholder="Escribe el nombre" autocomplete="off">
+    </form>
     <div class="who" id="whoChips"></div>
     <div class="draw-song" id="drawSong">¿Qué canción saldrá?</div>
     <ul class="draw-cards" id="drawCards"></ul>
-    <button class="btn primary big" id="btnDraw">Sortear canción</button>
+    <p class="draw-hint">Toca una canción para elegirla o gira la ruleta.</p>
+    <button class="btn primary big" id="btnDraw">Girar al azar</button>
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -397,8 +410,7 @@ function load() {
       S.rounds = S.rounds.filter(r => r.playerId);
     }
   } catch (e) {}
-  if (!S.teams.length) S.teams = [mkTeam("Participante 1"), mkTeam("Participante 2")];
-  if (!S.teams.some(t => t.id === S.current)) S.current = S.teams[0].id;
+  if (!S.teams.some(t => t.id === S.current)) S.current = S.teams.length ? S.teams[0].id : null;
 }
 function save() {
   try { localStorage.setItem("caiga.v1", JSON.stringify({ teams: S.teams, rounds: S.rounds,
@@ -712,53 +724,65 @@ function openDraw() {
   $("#drawOverlay").hidden = false; $("#btnDraw").focus();
 }
 function renderWho() {
-  $("#drawName").textContent = S.current ? "Turno de " + playerName(S.current) : "¿Quién canta?";
+  const inp = $("#drawPlayer"); if (document.activeElement !== inp) inp.value = S.current ? playerName(S.current) : "";
   const box = $("#whoChips"); box.innerHTML = "";
   S.teams.forEach(t => {
-    const b = document.createElement("button"); b.className = "chip"; b.textContent = t.name;
+    const b = document.createElement("button"); b.className = "chip"; b.textContent = t.name; b.type = "button";
     b.setAttribute("aria-pressed", String(t.id === S.current));
-    b.onclick = () => { if (drawing) return; S.current = t.id; save(); renderBoard(); renderWho(); };
+    b.onclick = () => { if (drawing) return; S.current = t.id; inp.value = t.name; save(); renderBoard(); renderWho(); };
     box.appendChild(b);
   });
-  const f = document.createElement("form");
-  f.innerHTML = '<input type="text" id="whoName" maxlength="24" placeholder="+ Agregar participante" aria-label="Nombre del participante">';
-  f.onsubmit = e => {
-    e.preventDefault(); const n = f.firstChild.value.trim(); if (!n || drawing) return;
-    const t = mkTeam(n); S.teams.push(t); S.current = t.id; save(); renderBoard(); renderWho(); $("#btnDraw").focus();
-  };
-  box.appendChild(f);
+}
+// Toma el nombre escrito en la ruleta: si ya existe ese participante le da el turno; si no, lo crea.
+function ensurePlayer() {
+  const name = $("#drawPlayer").value.trim();
+  if (!name) { toast("Escribe el nombre de quien canta."); $("#drawPlayer").focus(); return false; }
+  let t = S.teams.find(x => x.name.toLowerCase() === name.toLowerCase());
+  if (!t) { t = mkTeam(name); S.teams.push(t); }
+  if (S.current !== t.id) { S.current = t.id; S.pendingTurnStart = true; }
+  save(); renderBoard(); renderWho(); return true;
 }
 function renderCards() {
   const ul = $("#drawCards"); ul.innerHTML = "";
   FONSECA.forEach(song => {
-    const li = document.createElement("li"); li.textContent = song.title; li.dataset.id = song.id;
-    if (!S.pool.includes(song.id)) li.className = "off";
-    ul.appendChild(li);
+    const li = document.createElement("li"), b = document.createElement("button");
+    li.dataset.id = song.id; b.type = "button"; b.textContent = song.title;
+    if (!S.pool.includes(song.id)) { li.className = "off"; b.disabled = true; b.title = "Esta canción no está marcada para el juego"; }
+    else { b.title = "Elegir esta canción"; b.onclick = () => runDraw(song.id); }
+    li.appendChild(b); ul.appendChild(li);
   });
 }
 let drawing = false;
-async function runDraw() {
+// Sin argumento gira al azar; con el id de una canción la elige directamente.
+async function runDraw(chosenId) {
   if (drawing) return;
+  if (!ensurePlayer()) return;
   const pool = FONSECA.filter(x => S.pool.includes(x.id));
-  if (!S.current) { toast("Agrega un participante antes de sortear."); return; }
   if (!pool.length) { toast("Marca al menos una canción para el sorteo."); return; }
-  // Bolsa sin repetición: no se repite una canción hasta que hayan salido todas las marcadas.
+  // Bolsa sin repetición: al azar no se repite una canción hasta que hayan salido todas las marcadas.
   S.bag = S.bag.filter(id => S.pool.includes(id));
-  if (!S.bag.length) S.bag = pool.map(x => x.id).filter(id => id !== S.turnSong || pool.length === 1);
-  const song = songById(S.bag.splice(rand(0, S.bag.length - 1), 1)[0]);
+  let song;
+  if (chosenId && S.pool.includes(chosenId)) { song = songById(chosenId); S.bag = S.bag.filter(id => id !== chosenId); }
+  else {
+    if (!S.bag.length) S.bag = pool.map(x => x.id).filter(id => id !== S.turnSong || pool.length === 1);
+    song = songById(S.bag.splice(rand(0, S.bag.length - 1), 1)[0]);
+  }
   drawing = true; $("#btnDraw").disabled = true;
   const el = $("#drawSong"), fast = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const cards = [...document.querySelectorAll("#drawCards li")].filter(li => S.pool.includes(li.dataset.id));
   const light = id => cards.forEach(li => li.classList.toggle("on", li.dataset.id === id));
   el.classList.remove("landed"); cards.forEach(li => li.classList.remove("win"));
-  // La luz recorre las tarjetas y va frenando hasta caer en la canción sorteada.
-  const steps = fast ? 1 : 20 + rand(0, cards.length - 1);
-  let k = 0, at = rand(0, cards.length - 1);
-  for (; k < steps; k++) { at = (at + 1) % cards.length; light(cards[at].dataset.id); el.textContent = songById(cards[at].dataset.id).title; await sleep(45 + k * k * 0.9); }
-  light(null); const win = cards.find(li => li.dataset.id === song.id); if (win) win.classList.add("win");
+  if (!chosenId) {
+    // La luz recorre las tarjetas y va frenando hasta caer en la canción sorteada.
+    const steps = fast ? 1 : 20 + rand(0, cards.length - 1);
+    let at = rand(0, cards.length - 1);
+    for (let k = 0; k < steps; k++) { at = (at + 1) % cards.length; light(cards[at].dataset.id); el.textContent = songById(cards[at].dataset.id).title; await sleep(45 + k * k * 0.9); }
+    light(null);
+  }
+  const win = cards.find(li => li.dataset.id === song.id); if (win) win.classList.add("win");
   el.textContent = song.title; void el.offsetWidth; el.classList.add("landed");
   S.turnSong = song.id; save(); renderBoard();
-  await sleep(fast ? 400 : 1800);
+  await sleep(fast ? 400 : chosenId ? 1200 : 1800);
   drawing = false; $("#btnDraw").disabled = false; $("#drawOverlay").hidden = true;
   S.nextAutoAt = 2; S.lastIdx = -2;
   loadPreset(song, true);
@@ -1096,7 +1120,8 @@ $("#btnUnmute").addEventListener("click", () => { if (S.player && !S.player.isPl
 $("#btnRestart").onclick = () => { if (!S.player) return; if (S.muted) doUnmute(true); closeJudge(); S.player.seek(0); S.nextAutoAt = 2; S.lastIdx = -2; };
 $("#btnNext").onclick = closeJudge;
 $("#btnOpenDraw").onclick = openDraw;
-$("#btnDraw").onclick = runDraw;
+$("#btnDraw").onclick = () => runDraw();
+$("#drawWho").onsubmit = e => { e.preventDefault(); if (ensurePlayer()) $("#btnDraw").focus(); };
 $("#btnSync").onclick = () => {
   if (!S.player || !S.lines.length) return;
   const raw = S.player.getTime(); let best = null;
