@@ -34,9 +34,11 @@ Las letras sincronizadas se buscan en [LRCLIB](https://lrclib.net) o se pegan en
 - **Silencios manuales:** el presentador pulsa `Espacio` para silenciar y para volver.
 - Al volver la música se muestra la línea donde va la canción y se califica al participante: En la nota +100, Cerca +50, Perdido 0.
 - **Micrófono (experimental, Chrome/Edge):** transcribe lo que canta durante el silencio y sugiere una calificación.
-- **Ajustar letra aquí:** si la letra va adelantada o atrasada, pulsa el botón justo cuando empiece una línea.
+- **Ajuste de letra por canción:** si la letra no va a tiempo, pulsa **La letra va tarde** (`→`) o **La letra va antes** (`←`), de 0.25 s en 0.25 s, o **Ajustar letra aquí** justo cuando el cantante empiece una línea. El ajuste queda guardado para ese video en ese navegador.
+- **Dejar los ajustes fijos:** en la tarjeta *Ajustes de letra*, **Copiar ajustes** copia los valores; se pegan en `OFFSETS` dentro de `index.html` para que sirvan en cualquier dispositivo.
+- El silencio nunca dura más que el tiempo hasta la línea de regreso más 3 s (máximo 30 s); si el video quedó detenido al volver el sonido, se reanuda solo.
 
-Atajos: `Espacio` silenciar/volver · `P` reproducir/pausar · `1` en la nota · `2` cerca · `3` perdido · `Enter` siguiente ronda.
+Atajos: `Espacio` silenciar/volver · `P` reproducir/pausar · `←` `→` ajustar letra · `1` en la nota · `2` cerca · `3` perdido · `Enter` siguiente ronda.
 
 ## Antes de usarlo en eventos públicos
 

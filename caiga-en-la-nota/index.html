@@ -191,7 +191,9 @@ details summary{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px
         <button class="btn primary" id="btnPlay">Reproducir <kbd>P</kbd></button>
         <button class="btn hot" id="btnMute">Silenciar <kbd>Espacio</kbd></button>
         <button class="btn" id="btnRestart">Reiniciar</button>
-        <button class="btn" id="btnSync" title="Púlsalo justo cuando empiece una línea de la letra">Ajustar letra aquí</button>
+        <button class="btn" id="btnSync" title="Púlsalo justo cuando el cantante empiece una línea">Ajustar letra aquí</button>
+        <button class="btn" id="btnLate" title="La letra aparece después de que se canta: se adelanta 0.25 s">La letra va tarde <kbd>→</kbd></button>
+        <button class="btn" id="btnEarly" title="La letra aparece antes de que se cante: se atrasa 0.25 s">La letra va antes <kbd>←</kbd></button>
       </div>
       <div class="yt-wrap" id="ytWrap" hidden><div id="ytPlayer"></div></div>
       <div class="mute-overlay" id="muteOverlay" hidden>
@@ -296,9 +298,17 @@ details summary{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px
         </label>
         <div>
           <label for="rngOffset">Desfase de la letra <span class="mono" id="offsetVal">0.00 s</span></label>
-          <input type="range" id="rngOffset" min="-3000" max="3000" step="50" value="0">
+          <input type="range" id="rngOffset" min="-15000" max="15000" step="50" value="0">
         </div>
       </div>
+    </section>
+
+    <section class="card" aria-labelledby="hSync">
+      <h2 id="hSync">Ajustes de letra</h2>
+      <p class="note">Se guardan por canción en este navegador. Cuando todas vayan a tiempo, cópialos y envíalos para dejarlos fijos en el juego.</p>
+      <ul class="history" id="offsetList"></ul>
+      <button class="btn small" id="btnCopyOffsets">Copiar ajustes</button>
+      <textarea id="offsetText" hidden aria-label="Ajustes de letra" readonly></textarea>
     </section>
 
     <section class="card" aria-labelledby="hHist">
@@ -361,6 +371,8 @@ const FONSECA = [
   { id: "lejos",      title: "Estar lejos",         lrc: 25240297, yt: ["PLTGxBrTej4", "4WG4SvyVss0"] },
 ];
 const songById = id => FONSECA.find(x => x.id === id);
+// Desfase de la letra por video, en milisegundos (positivo = la letra se adelanta). Se llenan con los ajustes medidos en el evento.
+const OFFSETS = {};
 
 /* ---------- Estado ---------- */
 const S = {
@@ -368,7 +380,7 @@ const S = {
   offset: 0, muted: false, muteWall: 0, muteIdx: -1, autoTarget: -1,
   judging: false, nextAutoAt: 2, lastIdx: -2,
   teams: [], rounds: [], current: null, perTurn: 3, turnDone: false,
-  pool: FONSECA.map(x => x.id), bag: [], turnSong: null, preset: null, lrcDur: 0,
+  pool: FONSECA.map(x => x.id), bag: [], turnSong: null, preset: null, lrcDur: 0, offsets: {}, muteDeadline: 0,
   mode: "auto", len: 2, showLyrics: true, mic: false, lang: "es-ES",
 };
 
@@ -377,7 +389,7 @@ function load() {
     const d = JSON.parse(localStorage.getItem("caiga.v1") || "null");
     if (d) {
       S.teams = d.teams || []; S.rounds = d.rounds || [];
-      Object.assign(S, pick(d.settings || {}, ["mode","len","showLyrics","mic","lang","offset","perTurn","current","pool","bag","turnSong"]));
+      Object.assign(S, pick(d.settings || {}, ["mode","len","showLyrics","mic","lang","offset","perTurn","current","pool","bag","turnSong","offsets"]));
       S.pool = S.pool.filter(songById);
       S.rounds = S.rounds.filter(r => r.playerId);
     }
@@ -387,7 +399,7 @@ function load() {
 }
 function save() {
   try { localStorage.setItem("caiga.v1", JSON.stringify({ teams: S.teams, rounds: S.rounds,
-    settings: pick(S, ["mode","len","showLyrics","mic","lang","offset","perTurn","current","pool","bag","turnSong"]) })); } catch (e) {}
+    settings: pick(S, ["mode","len","showLyrics","mic","lang","offset","perTurn","current","pool","bag","turnSong","offsets"]) })); } catch (e) {}
 }
 function pick(o, keys) { const r = {}; keys.forEach(k => { if (k in o) r[k] = o[k]; }); return r; }
 function mkTeam(name) {
@@ -540,13 +552,24 @@ class YouTubePlayer {
     if (this.i < this.ids.length - 1) {
       this.i++; toast(`YouTube: ${m}. Probando otra versión…`);
       if (this.want) this.p.loadVideoById(this.id); else this.p.cueVideoById(this.id);
+      applyVideoOffset();
     } else toast(`YouTube: ${m}. No quedan más versiones de esta canción.`, 6000);
   }
   play() { this.want = true; this.p.playVideo(); } pause() { this.want = false; this.p.pauseVideo(); } seek(t) { this.p.seekTo(t, true); }
   getTime() { return this.p && this.p.getCurrentTime ? this.p.getCurrentTime() : 0; }
   isPlaying() { return !!this.p && this.p.getPlayerState && this.p.getPlayerState() === 1; }
   duration() { return this.p && this.p.getDuration ? this.p.getDuration() : 0; }
-  mute() { this.p.mute(); } unmute() { this.p.unMute(); }
+  mute() { this.silenced = true; try { this.p.mute(); this.p.setVolume(0); } catch (e) {} }
+  // YouTube a veces ignora unMute(); se repite hasta comprobar que de verdad volvió el volumen.
+  unmute() {
+    this.silenced = false;
+    const fix = n => {
+      if (this.silenced) return;
+      try { this.p.unMute(); this.p.setVolume(100); } catch (e) {}
+      if (n > 0) setTimeout(() => { try { if (!this.silenced && (this.p.isMuted() || this.p.getVolume() < 100)) fix(n - 1); } catch (e) {} }, 250);
+    };
+    fix(8);
+  }
   destroy() { try { this.p && this.p.destroy(); } catch (e) {} $("#ytWrap").hidden = true; }
 }
 
@@ -635,6 +658,11 @@ async function fetchLyrics(id) {
   if (j) { const c = { syncedLyrics: j.syncedLyrics, duration: j.duration }; try { localStorage.setItem("caiga.lrc." + id, JSON.stringify(c)); } catch (e) {} return c; }
   return null;
 }
+const videoId = () => (S.player && S.player.ids ? S.player.id : null);
+function applyVideoOffset() {
+  const v = videoId(); if (!v) return;
+  setOffset(v in S.offsets ? S.offsets[v] : (OFFSETS[v] || 0), true);
+}
 async function loadPreset(song, autoplay) {
   S.preset = song;
   $("#lrcStatus").textContent = "Cargando letra…"; S.lines = []; render(true);
@@ -643,6 +671,7 @@ async function loadPreset(song, autoplay) {
   if (S.preset !== song) return;
   if (lrc) { S.lrcDur = lrc.duration; setLyrics(parseLRC(lrc.syncedLyrics), "Fonseca · " + song.title); }
   else $("#lrcStatus").textContent = "No se pudo traer la letra de LRCLIB. Revisa la conexión y vuelve a sortear.";
+  applyVideoOffset();
   if (autoplay && S.player && S.preset === song) {
     S.player.play();
     // Algunos navegadores bloquean el sonido automático; en ese caso se pide pulsar Reproducir.
@@ -762,6 +791,9 @@ function doMute() {
   if (S.muted || S.turnDone || !S.player || !S.player.isPlaying()) return;
   closeJudge();
   S.player.mute(); S.muted = true; S.muteWall = performance.now(); S.muteIdx = curIdx();
+  // Plazo máximo del silencio: lo que falta hasta la línea objetivo más 3 s (25 s en modo manual; nunca más de 30 s).
+  const left = S.autoTarget >= 0 ? S.lines[S.autoTarget].t - curT() : 22;
+  S.muteDeadline = S.muteWall + Math.min(30, Math.max(4, left + 3)) * 1000;
   $("#stage").classList.add("is-muted"); $("#muteOverlay").hidden = false; $("#micLive").textContent = "";
   $("#lPrev").textContent = ""; $("#lCur").textContent = ""; $("#lNext").textContent = "";
   startMic();
@@ -773,6 +805,10 @@ function doUnmute(silent) {
   const secs = (performance.now() - S.muteWall) / 1000;
   stopMic();
   if (silent) return;
+  // Si al volver el sonido el video de YouTube quedó detenido, se reanuda; si el navegador no deja, se avisa.
+  const pl = S.player, stuck = () => pl === S.player && !S.muted && pl.want === true && !pl.isPlaying() && !S.turnDone;
+  setTimeout(() => { if (stuck()) { try { pl.play(); } catch (e) {} } }, 700);
+  setTimeout(() => { if (stuck()) toast("La música quedó en pausa: pulsa Reproducir.", 5000); }, 2200);
   let idx = curIdx(); if (idx < 0 || !S.lines[idx].text) idx = textFrom(Math.max(idx, 0));
   if (idx < 0) idx = textFrom(S.lines.length - 1, -1);
   openJudge(idx, secs);
@@ -976,12 +1012,13 @@ function tick() {
   $("#btnMute").disabled = !playing && !S.muted;
   if (S.muted) {
     $("#muteTimer").textContent = ((performance.now() - S.muteWall) / 1000).toFixed(1) + " s";
-    if (S.autoTarget >= 0 && curIdx() >= S.autoTarget) doUnmute();
+    if ((S.autoTarget >= 0 && curIdx() >= S.autoTarget) || performance.now() > S.muteDeadline) doUnmute();
   } else {
     const idx = curIdx();
     if (S.mode === "auto" && playing && !S.judging && !S.turnDone && S.lines.length && idx !== S.lastIdx && idx >= S.nextAutoAt && S.lines[idx] && S.lines[idx].text) {
       const [a, b] = LEN_RANGES[S.len], target = textFrom(idx + rand(a, b));
-      if (target > idx) { S.autoTarget = target; doMute(); }
+      // Solo se silencia si la línea de regreso cae antes del final del video.
+      if (target > idx && (!d || S.lines[target].t - S.offset / 1000 < d - 3)) { S.autoTarget = target; doMute(); }
     }
     render(false);
   }
@@ -1001,6 +1038,8 @@ function toggleMute() {
 $("#btnPlay").onclick = togglePlay;
 $("#btnMute").onclick = toggleMute;
 $("#btnUnmute").onclick = () => doUnmute();
+// Un toque directo del presentador también sirve para reanudar si el navegador detuvo el video.
+$("#btnUnmute").addEventListener("click", () => { if (S.player && !S.player.isPlaying()) S.player.play(); });
 $("#btnRestart").onclick = () => { if (!S.player) return; if (S.muted) doUnmute(true); closeJudge(); S.player.seek(0); S.nextAutoAt = 2; S.lastIdx = -2; };
 $("#btnNext").onclick = closeJudge;
 $("#btnOpenDraw").onclick = openDraw;
@@ -1009,21 +1048,45 @@ $("#btnSync").onclick = () => {
   if (!S.player || !S.lines.length) return;
   const raw = S.player.getTime(); let best = null;
   for (const l of S.lines) if (l.text && (!best || Math.abs(l.t - raw - S.offset / 1000) < Math.abs(best.t - raw - S.offset / 1000))) best = l;
-  if (!best || Math.abs(best.t - raw - S.offset / 1000) > 3) { toast("No hay una línea cerca de este momento."); return; }
+  if (!best || Math.abs(best.t - raw - S.offset / 1000) > 6) { toast("No hay una línea cerca de este momento. Usa «La letra va tarde / antes»."); return; }
   setOffset(Math.round((best.t - raw) * 1000 / 50) * 50);
-  toast(`Letra ajustada a «${best.text}»`);
+  toast(`Letra ajustada a «${best.text}» y guardada para esta canción`);
 };
-function setOffset(ms) {
-  S.offset = Math.max(-3000, Math.min(3000, ms)); $("#rngOffset").value = S.offset;
-  $("#offsetVal").textContent = (S.offset >= 0 ? "+" : "") + (S.offset / 1000).toFixed(2) + " s"; S.lastIdx = -2; save();
+function setOffset(ms, fromVideo) {
+  S.offset = Math.max(-15000, Math.min(15000, Math.round(ms))); $("#rngOffset").value = S.offset;
+  $("#offsetVal").textContent = (S.offset >= 0 ? "+" : "") + (S.offset / 1000).toFixed(2) + " s"; S.lastIdx = -2;
+  const v = videoId(); if (v && !fromVideo) S.offsets[v] = S.offset;
+  save(); renderOffsets();
+}
+function nudge(ms) {
+  if (!S.player) return; setOffset(S.offset + ms);
+  toast(`Letra ${S.offset >= 0 ? "+" : ""}${(S.offset / 1000).toFixed(2)} s · guardado para esta canción`, 1800);
+}
+function renderOffsets() {
+  const ul = $("#offsetList"); if (!ul) return; ul.innerHTML = "";
+  FONSECA.forEach(song => song.yt.forEach(v => {
+    if (!(v in S.offsets)) return;
+    const li = document.createElement("li"); li.textContent = `${song.title} (${v}): ${(S.offsets[v] / 1000).toFixed(2)} s`; ul.appendChild(li);
+  }));
+  if (!ul.children.length) ul.innerHTML = "<li>Todavía no hay ajustes guardados.</li>";
 }
 $("#rngOffset").oninput = e => setOffset(+e.target.value);
+$("#btnLate").onclick = () => nudge(250);
+$("#btnEarly").onclick = () => nudge(-250);
+$("#btnCopyOffsets").onclick = async () => {
+  const out = {}; FONSECA.forEach(song => song.yt.forEach(v => { if (v in S.offsets) out[v] = S.offsets[v]; }));
+  const txt = "Ajustes Caiga en la Nota: " + JSON.stringify(out);
+  try { await navigator.clipboard.writeText(txt); toast("Ajustes copiados. Pégalos en el chat."); }
+  catch (e) { $("#offsetText").hidden = false; $("#offsetText").value = txt; $("#offsetText").select(); toast("Copia el texto seleccionado."); }
+};
 
 document.addEventListener("keydown", e => {
   if (e.target.closest("input,textarea,select")) return;
   if (!$("#drawOverlay").hidden) { if (e.code === "Space" && !e.target.closest("button")) { e.preventDefault(); runDraw(); } return; }
   if (e.code === "Space") { e.preventDefault(); toggleMute(); }
   else if (e.key === "p" || e.key === "P") togglePlay();
+  else if (e.key === "ArrowRight") { e.preventDefault(); nudge(250); }
+  else if (e.key === "ArrowLeft") { e.preventDefault(); nudge(-250); }
   else if (e.key === "Enter" && S.judging) { e.preventDefault(); closeJudge(); }
   else if (/^[1-3]$/.test(e.key) && S.judging) award([100, 50, 0][+e.key - 1]);
 });
@@ -1085,7 +1148,7 @@ $("#selLang").onchange = e => { S.lang = e.target.value; save(); };
 load();
 $("#chkShow").checked = S.showLyrics; $("#chkMic").checked = S.mic; $("#selLang").value = S.lang;
 bindSeg("#segMode", "mode", String); bindSeg("#segLen", "len", Number); bindSeg("#segTurn", "perTurn", Number); setOffset(S.offset);
-renderBoard(); renderHistory(); renderPool();
+renderBoard(); renderHistory(); renderPool(); renderOffsets();
 setLyrics(parseLRC(DEMO_LRC), "Cielito lindo (demo)");
 useSource("demo", new DemoPlayer(), true);
 S.turnSong = null; renderBoard();
