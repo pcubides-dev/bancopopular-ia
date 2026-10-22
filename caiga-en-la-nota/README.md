@@ -1,6 +1,6 @@
 # Caiga en la Nota
 
-Juego tipo karaoke: suena una canción, la música se silencia unos segundos, la gente sigue cantando y, cuando vuelve el sonido, aparece la línea exacta donde va la canción. El presentador (o el micrófono) decide qué equipos "cayeron en la nota".
+Juego tipo karaoke: suena una canción, la música se silencia unos segundos, la gente sigue cantando y, cuando vuelve el sonido, aparece la línea exacta donde va la canción. Juega una persona a la vez: el presentador (o el micrófono) decide si "cayó en la nota" y los puntos van al participante de turno.
 
 ## Cómo correrlo
 
@@ -25,13 +25,15 @@ Las letras sincronizadas se buscan en [LRCLIB](https://lrclib.net) o se pegan en
 
 ## Cómo se juega
 
-- **Silencios automáticos:** al empezar una línea, la música se silencia y vuelve exactamente al inicio de una línea 1 a 5 líneas después (según la duración elegida).
+- Agrega a los participantes. Juega **una persona a la vez**; el botón **Jugar** de cada nombre le da el turno.
+- **Rondas por turno:** 3, 5 o sin límite. Al terminar, la canción se pausa, se muestra el total del turno y el botón pasa al siguiente participante (la canción vuelve a empezar).
+- **Silencios automáticos:** al empezar una línea, la música se silencia y vuelve exactamente al inicio de una línea posterior (según la duración elegida).
 - **Silencios manuales:** el presentador pulsa `Espacio` para silenciar y para volver.
-- Al volver la música se muestra la línea donde va la canción y se puntúa: En la nota +100, Cerca +50, Perdidos 0.
-- **Micrófono (experimental, Chrome/Edge):** transcribe lo que canta el público durante el silencio y sugiere un veredicto.
+- Al volver la música se muestra la línea donde va la canción y se califica al participante: En la nota +100, Cerca +50, Perdido 0.
+- **Micrófono (experimental, Chrome/Edge):** transcribe lo que canta durante el silencio y sugiere una calificación.
 - **Ajustar letra aquí:** si la letra va adelantada o atrasada, pulsa el botón justo cuando empiece una línea.
 
-Atajos: `Espacio` silenciar/volver · `P` reproducir/pausar · `1`–`9` equipo en la nota · `Enter` siguiente ronda.
+Atajos: `Espacio` silenciar/volver · `P` reproducir/pausar · `1` en la nota · `2` cerca · `3` perdido · `Enter` siguiente ronda.
 
 ## Antes de usarlo en eventos públicos
 
