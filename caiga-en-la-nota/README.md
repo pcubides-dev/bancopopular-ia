@@ -38,7 +38,7 @@ Las letras sincronizadas se buscan en [LRCLIB](https://lrclib.net) o se pegan en
 - **Dejar los ajustes fijos:** en la tarjeta *Ajustes de letra*, **Copiar ajustes** copia los valores; se pegan en `OFFSETS` dentro de `index.html` para que sirvan en cualquier dispositivo.
 - El silencio nunca dura más que el tiempo hasta la línea de regreso más 3 s (máximo 30 s); si el video quedó detenido al volver el sonido, se reanuda solo.
 
-Atajos: `Espacio` silenciar/volver · `P` reproducir/pausar · `←` `→` ajustar letra · `1` en la nota · `2` cerca · `3` perdido · `Enter` siguiente ronda.
+Atajos: `Espacio` silenciar/volver · `P` reproducir/pausar · `←` `→` ajustar letra · `1` en la nota · `2` cerca · `3` perdido · `Enter` siguiente ronda · `D` diagnóstico (estado del reproductor, tiempo, línea y errores).
 
 ## Antes de usarlo en eventos públicos
 

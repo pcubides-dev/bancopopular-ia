@@ -67,6 +67,7 @@ kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-b
 .mute-big{font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(32px,6vw,68px);line-height:1;color:var(--fg)}
 .mute-timer{font-size:28px;color:var(--gold)}
 .mic-live{color:#ffd9dc;font-style:italic;max-width:60ch;min-height:1.5em}
+.diag{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.45);color:#fff;font-size:12px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
 .progress{height:8px;border-radius:99px;background:rgba(0,0,0,.25);overflow:hidden}
 .progress>div{height:100%;width:0;background:var(--gold)}
 .controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
@@ -187,6 +188,7 @@ details summary{cursor:pointer;color:var(--muted);font-weight:700;font-size:14px
         <p class="l next" id="lNext"></p>
       </div>
       <div class="progress" aria-hidden="true"><div id="prog"></div></div>
+      <pre class="diag mono" id="diag" hidden></pre>
       <div class="controls">
         <button class="btn primary" id="btnPlay">Reproducir <kbd>P</kbd></button>
         <button class="btn hot" id="btnMute">Silenciar <kbd>Espacio</kbd></button>
@@ -1006,7 +1008,21 @@ function renderHistory() {
 }
 
 /* ---------- Bucle principal ---------- */
+// El ciclo se ejecuta con requestAnimationFrame y, como respaldo, con un temporizador: así la letra sigue
+// avanzando aunque el navegador deje de pintar cuadros (ventana tapada) o un paso falle.
+let lastStep = 0, stepErrors = 0;
 function tick() {
+  try { step(); } catch (e) { reportError(e); }
+  requestAnimationFrame(tick);
+}
+setInterval(() => { if (performance.now() - lastStep > 300) { try { step(); } catch (e) { reportError(e); } } }, 250);
+function reportError(e) {
+  stepErrors++; S.lastError = (e && e.message) || String(e);
+  if (stepErrors === 1 || stepErrors % 200 === 0) toast("Error interno: " + S.lastError + ". Pulsa D y envía una foto de la pantalla.", 8000);
+}
+window.addEventListener("error", e => reportError(e.error || e.message));
+function step() {
+  lastStep = performance.now();
   const p = S.player, playing = !!p && p.isPlaying();
   const t = p ? p.getTime() : 0, d = p ? p.duration() : 0;
   $("#clock").textContent = `${fmt(t)} / ${fmt(d)}`;
@@ -1026,7 +1042,17 @@ function tick() {
     }
     render(false);
   }
-  requestAnimationFrame(tick);
+  if (!$("#diag").hidden) renderDiag();
+}
+function renderDiag() {
+  const p = S.player;
+  $("#diag").textContent = [
+    `fuente ${S.source}${p && p.ids ? " · video " + p.id : ""}`,
+    `estado ${p && p.state ? p.state() : p && p.isPlaying() ? "sonando" : "detenido"} · tiempo ${p ? p.getTime().toFixed(2) : "-"} s · desfase ${(S.offset / 1000).toFixed(2)} s`,
+    `línea ${curIdx()} / ${S.lines.length} · última pintada ${S.lastIdx}`,
+    `silencio ${S.muted} · calificando ${S.judging} · modo ${S.mode} · objetivo ${S.autoTarget}`,
+    `errores ${stepErrors}${S.lastError ? " · " + S.lastError : ""}`,
+  ].join("\n");
 }
 function onEnded() { if (S.muted) doUnmute(); }
 
@@ -1094,6 +1120,7 @@ document.addEventListener("keydown", e => {
   if (!$("#drawOverlay").hidden) { if (e.code === "Space" && !e.target.closest("button")) { e.preventDefault(); runDraw(); } return; }
   if (e.code === "Space") { e.preventDefault(); if (!e.repeat) toggleMute(); }
   else if (e.key === "p" || e.key === "P") togglePlay();
+  else if (e.key === "d" || e.key === "D") { $("#diag").hidden = !$("#diag").hidden; if (!$("#diag").hidden) renderDiag(); }
   else if (e.key === "ArrowRight") { e.preventDefault(); nudge(250); }
   else if (e.key === "ArrowLeft") { e.preventDefault(); nudge(-250); }
   else if (e.key === "Enter" && S.judging) { e.preventDefault(); closeJudge(); }
