@@ -522,7 +522,11 @@ async function useSource(kind, player, quiet) {
     if (info.query) { $("#lrcQuery").value = info.query; searchLyrics(info.query); }
     if (!quiet) toast("Canción lista. Busca su letra y pulsa Reproducir.");
   } catch (e) {
-    $("#srcStatus").textContent = "No se pudo cargar: " + (e && e.message || e);
+    const msg = String(e && e.message || e);
+    const blocked = (kind === "youtube" || kind === "apple") && /No se pudo cargar http|no respondió/.test(msg);
+    $("#srcStatus").textContent = blocked
+      ? `Esta página no pudo conectarse con ${kind === "youtube" ? "YouTube" : "Apple Music"}. Si la abriste desde el enlace de Claude, esa vista bloquea los reproductores externos: ábrela desde un servidor (ver README). Aquí sí funcionan la demo y los archivos de audio.`
+      : "No se pudo cargar: " + msg;
     try { player.destroy(); } catch (x) {}
   }
   render(true);
