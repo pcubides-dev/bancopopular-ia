@@ -26,10 +26,10 @@ Las letras sincronizadas se buscan en [LRCLIB](https://lrclib.net) o se pegan en
 ## Cómo se juega
 
 - Agrega a los participantes y marca qué canciones de **Fonseca** entran al sorteo (Te mando flores, Arroyito, Simples corazones, Eres mi sueño, Por pura curiosidad, Vine a buscarte, Estar lejos).
-- **Sorteo:** a cada participante le toca una canción al azar (sin repetir mientras alcancen). Al pulsar **Empezar el juego** se carga sola la canción del primero: video de YouTube y letra sincronizada.
+- **Sorteo por turno:** al empezar cada turno se pulsa **Sortear canción**; la ruleta elige una y la música arranca sola con su letra. No se repite una canción hasta que hayan salido todas las marcadas.
 - Cada canción trae varios videos de respaldo: si YouTube no deja insertar uno, se prueba el siguiente. Si el video que carga dura distinto que la letra, se busca la letra de esa duración.
-- Juega **una persona a la vez**; el botón **Jugar** de cada nombre le da el turno y carga su canción.
-- **Rondas por turno:** 3, 5 o sin límite. Al terminar, la canción se pausa, se muestra el total del turno y el botón pasa al siguiente participante (la canción vuelve a empezar).
+- Juega **una persona a la vez**; el botón **Jugar** de cada nombre le da el turno y abre el sorteo.
+- **Rondas por turno:** 3, 5 o sin límite. Al terminar, la canción se pausa, se muestra el total del turno y el botón pasa al siguiente participante, que sortea su propia canción.
 - **Silencios automáticos:** al empezar una línea, la música se silencia y vuelve exactamente al inicio de una línea posterior (según la duración elegida).
 - **Silencios manuales:** el presentador pulsa `Espacio` para silenciar y para volver.
 - Al volver la música se muestra la línea donde va la canción y se califica al participante: En la nota +100, Cerca +50, Perdido 0.
